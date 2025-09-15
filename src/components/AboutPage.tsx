@@ -55,8 +55,12 @@ const AboutPage: React.FC<AboutPageProps> = ({ isEnglish }) => {
           {/* Developer Profile */}
           <div className="space-y-6">
             <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-12 h-12 text-white" />
+              <div className="w-24 h-24 mx-auto mb-4">
+                <img 
+                  src="/微信图片_2025-08-10_134959_463.jpg" 
+                  alt="劉峻鑠"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-purple-200 shadow-lg"
+                />
               </div>
               <h4 className="text-2xl font-bold text-gray-900 mb-2">劉峻鑠</h4>
               <p className="text-gray-600">
