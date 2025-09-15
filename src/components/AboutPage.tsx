@@ -57,7 +57,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ isEnglish }) => {
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-4">
                 <img 
-                  src="/微信图片_2025-08-10_134959_463.jpg" 
+                  src="/developer-profile.jpg" 
                   alt="劉峻鑠"
                   className="w-24 h-24 rounded-full object-cover border-4 border-purple-200 shadow-lg"
                 />
