@@ -131,7 +131,9 @@ class DeepSeekService {
     try {
       const response = await this.callAPI(messages);
       const cleanedResponse = response.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      const parsed = JSON.parse(cleanedResponse);
+      // Escape newline characters to prevent JSON parsing errors
+      const escapedResponse = cleanedResponse.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+      const parsed = JSON.parse(escapedResponse);
       return {
         mainText: parsed.mainText || '',
         annotations: parsed.annotations || '',
