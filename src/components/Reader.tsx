@@ -250,19 +250,92 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
           </h3>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-100">
-          <div className="text-2xl font-serif text-gray-800 leading-loose">
-            {analysisResult ? (
-              <div className="text-left">
-                {renderFormattedText(currentDisplayText)}
+        {analysisResult ? (
+          <div className="space-y-6">
+            {/* Title Section */}
+            {analysisResult.title && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  <h4 className="font-semibold text-amber-900">
+                    {isEnglish ? 'Title' : '標題'}
+                  </h4>
+                </div>
+                <div className="text-2xl font-serif text-amber-800 text-center leading-relaxed">
+                  {analysisResult.title}
+                </div>
               </div>
-            ) : (
-              <div className="text-center">
-                {currentDisplayText === sampleText ? renderInteractiveText(sampleText) : renderInteractiveText(currentDisplayText)}
+            )}
+
+            {/* Annotations/Preface Section */}
+            {analysisResult.annotations && (
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <h4 className="font-semibold text-green-900">
+                    {isEnglish ? 'Annotations / Preface' : '註釋 / 序言'}
+                  </h4>
+                </div>
+                <div className="text-lg font-serif text-green-800 leading-relaxed">
+                  {renderInteractiveText(analysisResult.annotations)}
+                </div>
+              </div>
+            )}
+
+            {/* Main Text Section */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <h4 className="font-semibold text-blue-900">
+                  {isEnglish ? 'Main Text' : '正文'}
+                </h4>
+              </div>
+              <div className="text-2xl font-serif text-blue-800 leading-loose">
+                <div className="text-left">
+                  {renderFormattedText(currentDisplayText)}
+                </div>
+              </div>
+            </div>
+
+            {/* Copyright/Publication Info */}
+            {analysisResult.copyright && (
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <h4 className="font-semibold text-purple-900">
+                    {isEnglish ? 'Publication Info' : '版權信息'}
+                  </h4>
+                </div>
+                <div className="text-sm text-purple-800 leading-relaxed">
+                  {analysisResult.copyright}
+                </div>
+              </div>
+            )}
+
+            {/* Decorative Elements */}
+            {analysisResult.decorativeElements && (
+              <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl p-6 border border-rose-200">
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
+                  <h4 className="font-semibold text-rose-900">
+                    {isEnglish ? 'Decorative Elements' : '裝飾元素'}
+                  </h4>
+                </div>
+                <div className="text-sm text-rose-800 leading-relaxed">
+                  {analysisResult.decorativeElements}
+                </div>
               </div>
             )}
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-100">
+            <div className="text-2xl font-serif text-gray-800 leading-loose">
+              <div className="text-center">
+                {currentDisplayText === sampleText ? renderInteractiveText(sampleText) : renderInteractiveText(currentDisplayText)}
+              </div>
+            </div>
+          </div>
+        )}
 
         {!text && !displayText && (
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -281,12 +354,12 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
               </div>
               <div>
                 <p className="text-green-800 font-medium">
-                  {isEnglish ? 'Text Analysis Applied' : '文本分析已应用'}
+                  {isEnglish ? 'Detailed Analysis Complete' : '詳細分析完成'}
                 </p>
                 <p className="text-green-700 text-sm">
                   {isEnglish 
-                    ? `Formatted into ${analysisResult.paragraphs.length} paragraphs. Red highlights indicate questionable content.`
-                    : `已格式化为${analysisResult.paragraphs.length}个段落。红色高亮表示可疑内容。`
+                    ? 'Text has been categorized into title, annotations, main text, and other elements. Click any text for detailed annotations.'
+                    : '文本已分類為標題、註釋、正文和其他元素。點擊任何文字獲取詳細註釋。'
                   }
                 </p>
               </div>
