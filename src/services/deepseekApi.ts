@@ -109,6 +109,7 @@ class DeepSeekService {
 同时请：
 - 为正文添加适当的标点符号（句读）
 - 将正文按意义分段
+- 当遇到混合的不同类型文本（如诗歌、文章、标题、注释等）时，请在不同文本类型之间用两个空行分隔
 
 请以JSON格式返回：
 {
@@ -117,7 +118,7 @@ class DeepSeekService {
   "title": "标题内容", 
   "copyright": "版权或刻印信息",
   "decorativeElements": "装饰元素描述",
-  "punctuatedText": "加标点的正文",
+  "punctuatedText": "加标点的正文，不同文本类型之间用两个空行分隔",
   "paragraphs": ["分段后的正文数组"]
 }`
       },
