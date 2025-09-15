@@ -90,7 +90,9 @@ ${context ? `上下文：${context}` : ''}`
 
     try {
       const response = await this.callAPI(messages);
-      const parsed = JSON.parse(response);
+      // Clean the response by removing markdown code blocks
+      const cleanedResponse = response.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleanedResponse);
       return {
         explanation: parsed.explanation || '暂无解释',
         translation: parsed.translation || 'No translation available',
@@ -140,7 +142,9 @@ ${context ? `上下文：${context}` : ''}`
 
     try {
       const response = await this.callAPI(messages);
-      const parsed = JSON.parse(response);
+      // Clean the response by removing markdown code blocks
+      const cleanedResponse = response.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleanedResponse);
       return {
         content: parsed.content || '创作失败',
         explanation: parsed.explanation || '暂无解释',
