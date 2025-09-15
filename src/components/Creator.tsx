@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { PenTool, Sparkles, RefreshCw, Copy, Download } from 'lucide-react';
+import { PenTool, Sparkles, RefreshCw, Copy, Download, AlertCircle } from 'lucide-react';
+import { deepseekService } from '../services/deepseekApi';
 
 interface CreatorProps {
   isEnglish: boolean;
@@ -19,6 +20,7 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
   const [selectedStyle, setSelectedStyle] = useState<PoemStyle>('5char');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPoem, setGeneratedPoem] = useState<Poem | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const styles = [
     {
@@ -44,69 +46,33 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
     }
   ];
 
-  // Mock poem database for demo
-  const mockPoems: Record<PoemStyle, Poem[]> = {
-    '5char': [
-      {
-        content: '月下獨酌時，\n清風拂面來。\n孤影伴吾醉，\n詩心自徘徊。',
-        style: '五言絕句',
-        theme: '月光, 孤獨, 詩酒',
-        explanation: '此詩描寫月夜獨飲的情景，表達詩人孤獨而自得的心境。'
-      },
-      {
-        content: '春山花正開，\n流水向東歸。\n鳥語林間響，\n人閒心自飛。',
-        style: '五言絕句',
-        theme: '春天, 山水, 自然',
-        explanation: '描繪春日山景，以自然之美映襯心靈的自由與寧靜。'
-      }
-    ],
-    '7char': [
-      {
-        content: '秋風蕭瑟夜深沈，\n明月當空照古今。\n獨坐高樓望遠處，\n思君不見淚如金。',
-        style: '七言絕句',
-        theme: '秋夜, 思念, 離別',
-        explanation: '此詩表達秋夜思人的深情，以明月古今不變襯托人世離合之苦。'
-      },
-      {
-        content: '江南煙雨潤如詩，\n楊柳依依伴水湄。\n小橋流水人家美，\n一片春光醉客歸。',
-        style: '七言絕句',
-        theme: '江南, 春景, 詩意',
-        explanation: '描繪江南春日美景，以詩意的筆觸展現水鄉風情。'
-      }
-    ],
-    'couplet': [
-      {
-        content: '上聯：春風化雨潤大地\n下聯：明月照人暖心田',
-        style: '對聯',
-        theme: '春天, 自然, 溫暖',
-        explanation: '此聯以春風明月比喻溫暖人心的美好事物，對仗工整，意境深遠。'
-      },
-      {
-        content: '上聯：山高水長情不斷\n下聯：花開花落意無窮',
-        style: '對聯',
-        theme: '山水, 情感, 永恆',
-        explanation: '表達情感如山水般綿長，如花開花落般無窮無盡的意境。'
-      }
-    ]
-  };
-
   const generatePoem = async () => {
     if (!keywords.trim()) return;
 
     setIsGenerating(true);
-    
-    // Simulate AI generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Select a random poem from the mock database
-    const poemsOfStyle = mockPoems[selectedStyle];
-    const randomPoem = poemsOfStyle[Math.floor(Math.random() * poemsOfStyle.length)];
-    
-    setGeneratedPoem({
-      ...randomPoem,
-      theme: keywords // Use user's keywords as theme
-    });
-    setIsGenerating(false);
+    setError(null);
+
+    try {
+      const poemData = await deepseekService.generatePoetry(keywords, selectedStyle);
+      
+      const styleNames = {
+        '5char': '五言絕句',
+        '7char': '七言絕句',
+        'couplet': '對聯'
+      };
+
+      setGeneratedPoem({
+        content: poemData.content,
+        style: styleNames[selectedStyle],
+        theme: keywords,
+        explanation: `${poemData.explanation}\n\n格律分析：${poemData.styleAnalysis}`
+      });
+    } catch (err) {
+      console.error('Poetry generation error:', err);
+      setError(isEnglish ? 'Failed to generate poetry. Please try again.' : '詩詞生成失敗，請重試。');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyToClipboard = () => {
@@ -273,11 +239,32 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
         </div>
       )}
 
+      {/* Error Display */}
+      {error && (
+        <div className="mt-8 bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-900 mb-1">
+                {isEnglish ? 'Generation Error' : '生成錯誤'}
+              </h4>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sample Examples */}
       <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
         <h4 className="font-semibold text-gray-900 mb-4">
-          {isEnglish ? 'Sample Themes to Try' : '推薦主題'}
+          {isEnglish ? 'AI-Powered Creation - Sample Themes' : 'AI智能創作 - 推薦主題'}
         </h4>
+        <p className="text-sm text-gray-600 mb-3">
+          {isEnglish 
+            ? 'Powered by DeepSeek AI for authentic classical Chinese poetry generation'
+            : '由DeepSeek AI驅動，生成地道的古典中文詩詞'
+          }
+        </p>
         <div className="flex flex-wrap gap-2">
           {['月光', '春風', '思鄉', '山水', '離別', '友情'].map((theme) => (
             <button

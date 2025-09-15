@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, MessageCircle, X, Lightbulb, ExternalLink } from 'lucide-react';
+import { deepseekService } from '../services/deepseekApi';
 
 interface ReaderProps {
   isEnglish: boolean;
@@ -17,69 +18,37 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
   const [selectedText, setSelectedText] = useState('');
   const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [showAnnotation, setShowAnnotation] = useState(false);
+  const [isLoadingAnnotation, setIsLoadingAnnotation] = useState(false);
 
-  // Mock annotations database
-  const annotations: Record<string, Annotation> = {
-    '學而時習之': {
-      text: '學而時習之',
-      explanation: '學習並且經常溫習所學的知識',
-      translation: 'Learning and frequently reviewing what has been learned',
-      reference: '《論語·學而》'
-    },
-    '不亦說乎': {
-      text: '不亦說乎',
-      explanation: '不是很快樂嗎？「說」通「悦」，表示喜悅',
-      translation: 'Is it not a pleasure?',
-      reference: '《論語·學而》'
-    },
-    '有朋自遠方來': {
-      text: '有朋自遠方來',
-      explanation: '有志同道合的朋友從遠方來訪',
-      translation: 'Having friends come from afar',
-      reference: '《論語·學而》'
-    },
-    '天下皆知美之為美': {
-      text: '天下皆知美之為美',
-      explanation: '天下的人都知道美的所以為美',
-      translation: 'When all under Heaven know what is beautiful as beautiful',
-      reference: '《道德經》第二章'
-    },
-    '有無相生': {
-      text: '有無相生',
-      explanation: '有和無是相互依存、相互產生的',
-      translation: 'Being and non-being produce each other',
-      reference: '《道德經》第二章'
-    },
-    '莊周夢為胡蝶': {
-      text: '莊周夢為胡蝶',
-      explanation: '莊子夢見自己變成了蝴蝶',
-      translation: 'Zhuangzi dreamed he was a butterfly',
-      reference: '《莊子·齊物論》'
-    }
-  };
+  const handleTextSelection = async (selectedText: string) => {
+    if (selectedText.trim().length === 0) return;
 
-  const handleTextSelection = (selectedText: string) => {
-    // Find the best matching annotation
-    const matchingKey = Object.keys(annotations).find(key => 
-      selectedText.includes(key) || key.includes(selectedText)
-    );
-    
-    if (matchingKey) {
-      setSelectedText(selectedText);
-      setAnnotation(annotations[matchingKey]);
-      setShowAnnotation(true);
-    } else {
-      // Generate a mock annotation for demo purposes
+    setSelectedText(selectedText);
+    setIsLoadingAnnotation(true);
+    setShowAnnotation(true);
+    setAnnotation(null);
+
+    try {
+      const annotationData = await deepseekService.annotateText(selectedText, text);
       setSelectedText(selectedText);
       setAnnotation({
         text: selectedText,
-        explanation: isEnglish 
-          ? 'This phrase contains classical Chinese elements that would benefit from scholarly interpretation.'
-          : '此詞句包含古典中文元素，需要學術解釋。',
-        translation: isEnglish ? 'Translation would appear here' : '翻譯將在此顯示',
-        reference: isEnglish ? 'Classical text reference' : '古典文獻參考'
+        explanation: annotationData.explanation,
+        translation: annotationData.translation,
+        reference: annotationData.reference
       });
-      setShowAnnotation(true);
+    } catch (error) {
+      console.error('Failed to get annotation:', error);
+      setAnnotation({
+        text: selectedText,
+        explanation: isEnglish 
+          ? 'Failed to load annotation. Please try again.'
+          : '註釋載入失敗，請重試。',
+        translation: 'Annotation loading failed',
+        reference: 'Unable to retrieve reference'
+      });
+    } finally {
+      setIsLoadingAnnotation(false);
     }
   };
 
@@ -176,7 +145,7 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
                 <div className="flex items-center space-x-3">
                   <MessageCircle className="w-6 h-6 text-indigo-600" />
                   <h3 className="text-xl font-bold text-gray-900">
-                    {isEnglish ? 'Annotation' : '註釋'}
+                    {isEnglish ? 'AI Annotation' : 'AI註釋'}
                   </h3>
                 </div>
                 <button
@@ -187,13 +156,21 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              {isLoadingAnnotation ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <span className="ml-3 text-gray-600">
+                    {isEnglish ? 'Analyzing with AI...' : 'AI分析中...'}
+                  </span>
+                </div>
+              ) : annotation ? (
+                <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">
                     {isEnglish ? 'Selected Text' : '選中文本'}
                   </h4>
                   <div className="bg-yellow-100 rounded-lg p-3 text-lg font-serif text-gray-800">
-                    {annotation.text}
+                    {selectedText}
                   </div>
                 </div>
 
@@ -229,6 +206,7 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
                   </div>
                 )}
               </div>
+              ) : null}
 
               <div className="mt-6">
                 <button

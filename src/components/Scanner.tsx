@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, Upload, Loader, CheckCircle, AlertCircle } from 'lucide-react';
+import { deepseekService } from '../services/deepseekApi';
 
 interface ScannerProps {
   isEnglish: boolean;
@@ -10,12 +11,13 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [ocrResult, setOcrResult] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock classical Chinese texts for demo
-  const mockTexts = [
-    '子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」',
-    '天下皆知美之為美，斯惡已；皆知善之為善，斯不善已。故有無相生，難易相成，長短相較，高下相傾，音聲相和，前後相隨。',
-    '昔者莊周夢為胡蝶，栩栩然胡蝶也，自喻適志與！不知周也。俄然覺，則蘧蘧然周也。不知周之夢為胡蝶與，胡蝶之夢為周與？'
+  // Mock OCR raw text (simulating OCR output with errors)
+  const mockOCRTexts = [
+    '子曰学而时习之不亦说乎有朋自远方来不亦乐乎人不知而不愠不亦君子乎',
+    '天下皆知美之为美斯恶已皆知善之为善斯不善已故有无相生难易相成长短相较高下相倾音声相和前后相随',
+    '昔者庄周梦为胡蝶栩栩然胡蝶也自喻适志与不知周也俄然觉则蘧蘧然周也不知周之梦为胡蝶与胡蝶之梦为周与'
   ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,14 +35,24 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
   const processImage = async () => {
     setIsProcessing(true);
     setOcrResult('');
+    setError(null);
 
-    // Simulate OCR processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Simulate OCR processing delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Mock OCR result
-    const randomText = mockTexts[Math.floor(Math.random() * mockTexts.length)];
-    setOcrResult(randomText);
-    setIsProcessing(false);
+      // Get mock OCR raw text
+      const rawOCRText = mockOCRTexts[Math.floor(Math.random() * mockOCRTexts.length)];
+      
+      // Use DeepSeek API to correct and punctuate the text
+      const correctedText = await deepseekService.correctOCRText(rawOCRText);
+      setOcrResult(correctedText);
+    } catch (err) {
+      console.error('OCR processing error:', err);
+      setError(isEnglish ? 'Failed to process image. Please try again.' : '图像处理失败，请重试。');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleViewInReader = () => {
@@ -112,10 +124,25 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
               </h4>
               <p className="text-blue-700 text-sm">
                 {isEnglish 
-                  ? 'Applying OCR and intelligent text correction'
-                  : '應用OCR和智能文本校正'
+                  ? 'Applying OCR and AI-powered text correction with DeepSeek'
+                  : '應用OCR和DeepSeek智能文本校正'
                 }
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h4 className="font-semibold text-red-900">
+                {isEnglish ? 'Processing Error' : '處理錯誤'}
+              </h4>
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
           </div>
         </div>
@@ -151,6 +178,7 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
               onClick={() => {
                 setUploadedImage(null);
                 setOcrResult('');
+                setError(null);
               }}
               className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
             >
@@ -160,18 +188,18 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
         </div>
       )}
 
-      {/* Demo Hint */}
+      {/* AI Processing Info */}
       <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-6">
         <div className="flex items-start space-x-3">
           <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
           <div>
             <h4 className="font-semibold text-amber-900 mb-1">
-              {isEnglish ? 'Demo Mode' : '演示模式'}
+              {isEnglish ? 'AI-Powered Processing' : 'AI智能處理'}
             </h4>
             <p className="text-amber-700 text-sm">
               {isEnglish 
-                ? 'This is a demo version. The OCR processing is simulated with sample classical Chinese texts.'
-                : '這是演示版本。OCR處理是通過樣本古典中文文本模擬的。'
+                ? 'Using DeepSeek AI for intelligent text correction and punctuation. OCR simulation with real AI processing.'
+                : '使用DeepSeek AI進行智能文本校正和標點。OCR模擬配合真實AI處理。'
               }
             </p>
           </div>
