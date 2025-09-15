@@ -24,8 +24,8 @@ class OCRService {
   private apiUrl: string;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OCR_API_KEY;
-    this.apiUrl = import.meta.env.VITE_OCR_API_URL;
+    this.apiKey = import.meta.env.VITE_OCR_API_KEY || '30a87186a0d26670b6e9558515b25f';
+    this.apiUrl = import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image';
   }
 
   async processImage(imageFile: File): Promise<string> {
