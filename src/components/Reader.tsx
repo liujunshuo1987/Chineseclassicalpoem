@@ -31,6 +31,8 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
     paragraphs: string[];
   } | null>(null);
   const [showAnalysisResult, setShowAnalysisResult] = useState(false);
+  const [displayText, setDisplayText] = useState(text);
+  const [questionableSegments, setQuestionableSegments] = useState<string[]>([]);
 
   const handleTextSelection = async (selectedText: string) => {
     if (selectedText.trim().length === 0) return;
@@ -81,11 +83,92 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
 
   const useAnalyzedText = () => {
     if (analysisResult?.punctuatedText) {
-      // This would typically call a prop function to update the main text
-      // For now, we'll just close the analysis result
+      setDisplayText(analysisResult.punctuatedText);
+      // Mark questionable segments based on analysis
+      identifyQuestionableSegments(analysisResult.punctuatedText);
       setShowAnalysisResult(false);
       setInputText('');
     }
+  };
+
+  const identifyQuestionableSegments = (text: string) => {
+    // Simple heuristic to identify potentially questionable segments
+    const questionable: string[] = [];
+    
+    // Look for unusual character combinations or potential OCR errors
+    const segments = text.split(/[，。；：！？]/);
+    segments.forEach(segment => {
+      const trimmed = segment.trim();
+      if (trimmed.length > 0) {
+        // Mark segments with unusual patterns as questionable
+        if (
+          /[a-zA-Z0-9]/.test(trimmed) || // Contains Latin characters or numbers
+          /[^\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(trimmed) || // Contains non-CJK characters
+          trimmed.length < 2 || // Very short segments
+          /(.)\1{3,}/.test(trimmed) // Repeated characters (potential OCR error)
+        ) {
+          questionable.push(trimmed);
+        }
+      }
+    });
+    
+    setQuestionableSegments(questionable);
+  };
+
+  const renderFormattedText = (text: string) => {
+    if (!analysisResult?.paragraphs || analysisResult.paragraphs.length <= 1) {
+      return renderInteractiveText(text);
+    }
+
+    return (
+      <div className="space-y-6">
+        {analysisResult.paragraphs.map((paragraph, index) => (
+          <div key={index} className="paragraph-section">
+            <div className="flex items-center mb-3">
+              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-sm font-semibold text-indigo-600 mr-3">
+                {index + 1}
+              </div>
+              <div className="h-px bg-indigo-200 flex-1"></div>
+            </div>
+            <div className="text-xl font-serif leading-loose pl-11">
+              {renderInteractiveTextWithHighlights(paragraph)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderInteractiveTextWithHighlights = (text: string) => {
+    const segments = text.split('').map((char, index) => {
+      // Check if this character is part of a questionable segment
+      const isQuestionable = questionableSegments.some(segment => 
+        text.includes(segment) && segment.includes(char)
+      );
+      
+      return (
+        <span
+          key={index}
+          className={`cursor-pointer transition-colors rounded px-0.5 ${
+            isQuestionable 
+              ? 'bg-red-100 text-red-800 hover:bg-red-200 border-b border-red-300' 
+              : 'hover:bg-yellow-200'
+          }`}
+          onClick={() => {
+            // Find a reasonable segment around the clicked character
+            const start = Math.max(0, index - 3);
+            const end = Math.min(text.length, index + 4);
+            const segment = text.slice(start, end);
+            handleTextSelection(segment);
+          }}
+          title={isQuestionable ? (isEnglish ? 'Questionable content - click for analysis' : '可疑内容 - 点击分析') : ''}
+        >
+          {char}
+        </span>
+      );
+    });
+
+    return <div className="leading-relaxed">{segments}</div>;
   };
 
   const renderInteractiveText = (text: string) => {
@@ -115,7 +198,7 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
 
   const sampleText = "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」";
 
-  const displayText = text || sampleText;
+  const currentDisplayText = displayText || text || sampleText;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -141,16 +224,46 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
         </div>
         
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-100">
-          <div className="text-2xl font-serif text-gray-800 leading-loose text-center">
-            {text ? renderInteractiveText(text) : renderInteractiveText(sampleText)}
+          <div className="text-2xl font-serif text-gray-800 leading-loose">
+            {analysisResult ? (
+              <div className="text-left">
+                {renderFormattedText(currentDisplayText)}
+              </div>
+            ) : (
+              <div className="text-center">
+                {currentDisplayText === sampleText ? renderInteractiveText(sampleText) : renderInteractiveText(currentDisplayText)}
+              </div>
+            )}
           </div>
         </div>
 
-        {!text && (
+        {!text && !displayText && (
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
             <p className="text-blue-800 text-center">
               {defaultText}
             </p>
+          </div>
+        )}
+
+        {/* Analysis Status */}
+        {analysisResult && (
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 text-sm">✓</span>
+              </div>
+              <div>
+                <p className="text-green-800 font-medium">
+                  {isEnglish ? 'Text Analysis Applied' : '文本分析已应用'}
+                </p>
+                <p className="text-green-700 text-sm">
+                  {isEnglish 
+                    ? `Formatted into ${analysisResult.paragraphs.length} paragraphs. Red highlights indicate questionable content.`
+                    : `已格式化为${analysisResult.paragraphs.length}个段落。红色高亮表示可疑内容。`
+                  }
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -205,8 +318,9 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
             </h4>
             <ul className="text-indigo-700 space-y-1 text-sm">
               <li>• {isEnglish ? 'Click on characters or phrases to see annotations' : '點擊字符或短語查看註釋'}</li>
-              <li>• {isEnglish ? 'Highlighted text shows interactive elements' : '高亮文本顯示交互元素'}</li>
+              <li>• {isEnglish ? 'Yellow highlights show interactive elements, red highlights show questionable content' : '黄色高亮显示交互元素，红色高亮显示可疑内容'}</li>
               <li>• {isEnglish ? 'Annotations include modern explanations and references' : '註釋包括現代解釋和參考資料'}</li>
+              <li>• {isEnglish ? 'After analysis, text is formatted into numbered paragraphs' : '分析后，文本格式化为编号段落'}</li>
             </ul>
           </div>
         </div>
@@ -403,7 +517,7 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
                   onClick={useAnalyzedText}
                   className="flex-1 bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 transition-colors"
                 >
-                  {isEnglish ? 'Use This Analysis' : '使用此分析'}
+                  {isEnglish ? 'Apply Analysis to Reader' : '将分析应用到阅读器'}
                 </button>
                 <button
                   onClick={() => setShowAnalysisResult(false)}
