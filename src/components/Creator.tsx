@@ -6,7 +6,13 @@ interface CreatorProps {
   isEnglish: boolean;
 }
 
-type PoemStyle = '5char' | '7char' | 'couplet';
+type PoemCategory = 'poetry' | 'ci' | 'couplet' | 'fu';
+type PoemStyle = {
+  category: PoemCategory;
+  style: string;
+  displayName: string;
+  description: string;
+};
 
 interface Poem {
   content: string;
@@ -17,34 +23,184 @@ interface Poem {
 
 const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
   const [keywords, setKeywords] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState<PoemStyle>('5char');
+  const [selectedCategory, setSelectedCategory] = useState<PoemCategory>('poetry');
+  const [selectedStyle, setSelectedStyle] = useState<PoemStyle>({
+    category: 'poetry',
+    style: '5char_jueju',
+    displayName: '五言絕句',
+    description: '四行，每行五字'
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPoem, setGeneratedPoem] = useState<Poem | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const styles = [
+  const categories = [
     {
-      id: '5char' as PoemStyle,
-      nameEn: '5-Character Quatrain',
-      nameZh: '五言絕句',
-      descEn: 'Four lines, five characters each',
-      descZh: '四行，每行五字'
+      id: 'poetry' as PoemCategory,
+      nameEn: 'Poetry',
+      nameZh: '詩',
+      icon: '📜'
     },
     {
-      id: '7char' as PoemStyle,
-      nameEn: '7-Character Quatrain',
-      nameZh: '七言絕句',
-      descEn: 'Four lines, seven characters each',
-      descZh: '四行，每行七字'
+      id: 'ci' as PoemCategory,
+      nameEn: 'Ci',
+      nameZh: '詞',
+      icon: '🎵'
     },
     {
-      id: 'couplet' as PoemStyle,
+      id: 'couplet' as PoemCategory,
       nameEn: 'Couplet',
       nameZh: '對聯',
-      descEn: 'Two parallel lines with matching tones',
-      descZh: '兩行對偶，平仄相對'
+      icon: '🏮'
+    },
+    {
+      id: 'fu' as PoemCategory,
+      nameEn: 'Fu',
+      nameZh: '賦',
+      icon: '📖'
     }
   ];
+
+  const poetryStyles = [
+    {
+      category: 'poetry' as PoemCategory,
+      style: '5char_jueju',
+      displayName: '五言絕句',
+      description: '四行，每行五字',
+      descriptionEn: '4 lines, 5 characters each'
+    },
+    {
+      category: 'poetry' as PoemCategory,
+      style: '7char_jueju',
+      displayName: '七言絕句',
+      description: '四行，每行七字',
+      descriptionEn: '4 lines, 7 characters each'
+    },
+    {
+      category: 'poetry' as PoemCategory,
+      style: '5char_lushi',
+      displayName: '五言律詩',
+      description: '八行，每行五字，需遵循平仄格律',
+      descriptionEn: '8 lines, 5 characters each, tonal patterns required'
+    },
+    {
+      category: 'poetry' as PoemCategory,
+      style: '7char_lushi',
+      displayName: '七言律詩',
+      description: '八行，每行七字，需遵循平仄格律',
+      descriptionEn: '8 lines, 7 characters each, tonal patterns required'
+    },
+    {
+      category: 'poetry' as PoemCategory,
+      style: '5char_gushi',
+      displayName: '五言古詩',
+      description: '長度不定，每行五字，格律較寬鬆',
+      descriptionEn: 'Variable length, 5 characters per line, looser rules'
+    },
+    {
+      category: 'poetry' as PoemCategory,
+      style: '7char_gushi',
+      displayName: '七言古詩',
+      description: '長度不定，每行七字，格律較寬鬆',
+      descriptionEn: 'Variable length, 7 characters per line, looser rules'
+    }
+  ];
+
+  const ciStyles = [
+    {
+      category: 'ci' as PoemCategory,
+      style: 'dielianhua',
+      displayName: '蝶戀花',
+      description: '上下闋各五句，字數固定',
+      descriptionEn: 'Fixed pattern with upper and lower stanzas'
+    },
+    {
+      category: 'ci' as PoemCategory,
+      style: 'shuidiaogeto',
+      displayName: '水調歌頭',
+      description: '上下闋，氣勢宏大',
+      descriptionEn: 'Grand and majestic ci pattern'
+    },
+    {
+      category: 'ci' as PoemCategory,
+      style: 'niannujiao',
+      displayName: '念奴嬌',
+      description: '豪放詞牌，適合抒發壯志',
+      descriptionEn: 'Bold ci pattern for expressing grand aspirations'
+    },
+    {
+      category: 'ci' as PoemCategory,
+      style: 'rumenglin',
+      displayName: '如夢令',
+      description: '短小精悍，六句三十三字',
+      descriptionEn: 'Short and concise, 6 lines with 33 characters'
+    },
+    {
+      category: 'ci' as PoemCategory,
+      style: 'yumeiren',
+      displayName: '虞美人',
+      description: '婉約詞牌，適合抒情',
+      descriptionEn: 'Graceful ci pattern for lyrical expression'
+    },
+    {
+      category: 'ci' as PoemCategory,
+      style: 'huanxisha',
+      displayName: '浣溪沙',
+      description: '上三下四，清新淡雅',
+      descriptionEn: 'Fresh and elegant pattern'
+    },
+    {
+      category: 'ci' as PoemCategory,
+      style: 'qingyuan',
+      displayName: '青玉案',
+      description: '適合寫景抒懷',
+      descriptionEn: 'Suitable for scenic description and emotion'
+    }
+  ];
+
+  const otherStyles = [
+    {
+      category: 'couplet' as PoemCategory,
+      style: 'couplet',
+      displayName: '對聯',
+      description: '兩行對偶，平仄相對，語義呼應',
+      descriptionEn: 'Two parallel lines with tonal and semantic balance'
+    },
+    {
+      category: 'fu' as PoemCategory,
+      style: 'fu',
+      displayName: '賦',
+      description: '長篇韻文，鋪陳描寫，自由長度',
+      descriptionEn: 'Long descriptive prose-poetry, free length'
+    }
+  ];
+
+  const getAllStyles = () => {
+    return [...poetryStyles, ...ciStyles, ...otherStyles];
+  };
+
+  const getStylesForCategory = (category: PoemCategory) => {
+    switch (category) {
+      case 'poetry':
+        return poetryStyles;
+      case 'ci':
+        return ciStyles;
+      case 'couplet':
+        return otherStyles.filter(s => s.category === 'couplet');
+      case 'fu':
+        return otherStyles.filter(s => s.category === 'fu');
+      default:
+        return poetryStyles;
+    }
+  };
+
+  const handleCategoryChange = (category: PoemCategory) => {
+    setSelectedCategory(category);
+    const stylesForCategory = getStylesForCategory(category);
+    if (stylesForCategory.length > 0) {
+      setSelectedStyle(stylesForCategory[0]);
+    }
+  };
 
   const generatePoem = async () => {
     if (!keywords.trim()) return;
@@ -53,17 +209,11 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
     setError(null);
 
     try {
-      const poemData = await deepseekService.generatePoetry(keywords, selectedStyle);
+      const poemData = await deepseekService.generatePoetry(keywords, selectedStyle.style, selectedStyle.displayName);
       
-      const styleNames = {
-        '5char': '五言絕句',
-        '7char': '七言絕句',
-        'couplet': '對聯'
-      };
-
       setGeneratedPoem({
         content: poemData.content,
-        style: styleNames[selectedStyle],
+        style: selectedStyle.displayName,
         theme: keywords,
         explanation: `${poemData.explanation}\n\n格律分析：${poemData.styleAnalysis}`
       });
@@ -129,22 +279,46 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               {isEnglish ? 'Poetry Style' : '詩詞風格'}
             </label>
-            <div className="grid md:grid-cols-3 gap-4">
-              {styles.map((style) => (
+            
+            {/* Category Tabs */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {categories.map((category) => (
                 <div
-                  key={style.id}
-                  onClick={() => setSelectedStyle(style.id)}
+                  key={category.id}
+                  onClick={() => handleCategoryChange(category.id)}
                   className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${
-                    selectedStyle === style.id
+                    selectedCategory === category.id
                       ? 'border-indigo-500 bg-indigo-50'
                       : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-25'
                   }`}
                 >
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    {isEnglish ? style.nameEn : style.nameZh}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {isEnglish ? style.descEn : style.descZh}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">{category.icon}</span>
+                    <span className="font-semibold text-gray-900">
+                      {isEnglish ? category.nameEn : category.nameZh}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Style Options for Selected Category */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {getStylesForCategory(selectedCategory).map((style) => (
+                <div
+                  key={style.style}
+                  onClick={() => setSelectedStyle(style)}
+                  className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${
+                    selectedStyle.style === style.style
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25'
+                  }`}
+                >
+                  <h4 className="font-semibold text-gray-900 mb-1 text-sm">
+                    {style.displayName}
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    {isEnglish ? style.descriptionEn : style.description}
                   </p>
                 </div>
               ))}
@@ -265,6 +439,14 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
             : '由DeepSeek AI驅動，生成地道的古典中文詩詞'
           }
         </p>
+        <div className="mb-3">
+          <p className="text-xs text-gray-500">
+            {isEnglish 
+              ? `Current selection: ${selectedStyle.displayName} - ${selectedStyle.descriptionEn || selectedStyle.description}`
+              : `當前選擇：${selectedStyle.displayName} - ${selectedStyle.description}`
+            }
+          </p>
+        </div>
         <div className="flex flex-wrap gap-2">
           {['月光', '春風', '思鄉', '山水', '離別', '友情'].map((theme) => (
             <button

@@ -202,35 +202,57 @@ ${context ? `上下文：${context}` : ''}`
     }
   }
 
-  async generatePoetry(keywords: string, style: string): Promise<{
+  async generatePoetry(keywords: string, style: string, styleName: string): Promise<{
     content: string;
     explanation: string;
     styleAnalysis: string;
   }> {
-    const stylePrompts = {
-      '5char': '五言绝句（四行，每行五字，押韵）',
-      '7char': '七言绝句（四行，每行七字，押韵）',
-      'couplet': '对联（两行对偶，平仄相对）'
+    const getStylePrompt = (style: string): string => {
+      const stylePrompts: { [key: string]: string } = {
+        // Poetry styles
+        '5char_jueju': '五言绝句：四行，每行五字，押韵，平仄有序',
+        '7char_jueju': '七言绝句：四行，每行七字，押韵，平仄有序',
+        '5char_lushi': '五言律诗：八行，每行五字，严格平仄格律，中间两联对仗',
+        '7char_lushi': '七言律诗：八行，每行七字，严格平仄格律，中间两联对仗',
+        '5char_gushi': '五言古诗：每行五字，长度不定，格律相对自由',
+        '7char_gushi': '七言古诗：每行七字，长度不定，格律相对自由',
+        
+        // Ci styles
+        'dielianhua': '蝶恋花词牌：上下阕各五句，严格按照蝶恋花格律填词',
+        'shuidiaogeto': '水调歌头词牌：上下阕，气势宏大，严格按照水调歌头格律填词',
+        'niannujiao': '念奴娇词牌：豪放风格，适合抒发壮志，严格按照念奴娇格律填词',
+        'rumenglin': '如梦令词牌：六句三十三字，短小精悍，严格按照如梦令格律填词',
+        'yumeiren': '虞美人词牌：婉约风格，适合抒情，严格按照虞美人格律填词',
+        'huanxisha': '浣溪沙词牌：上三下四，清新淡雅，严格按照浣溪沙格律填词',
+        'qingyuan': '青玉案词牌：适合写景抒怀，严格按照青玉案格律填词',
+        
+        // Other styles
+        'couplet': '对联：两行对偶，平仄相对，语义呼应，字数相等',
+        'fu': '赋：长篇韵文，铺陈描写，句式灵活，可长可短'
+      };
+      
+      return stylePrompts[style] || '古典诗词';
     };
 
     const messages: DeepSeekMessage[] = [
       {
         role: 'system',
-        content: `你是一个古典诗词创作专家。请根据用户提供的关键词和风格创作诗词。
+        content: `你是一个古典诗词创作专家，精通各种诗词格律。请根据用户提供的关键词和风格创作诗词。
 要求：
-1. 严格按照指定的格律创作
-2. 注意平仄和押韵
-3. 意境优美，符合古典诗词风格
-4. 返回JSON格式：
+1. 严格按照指定的诗词格律和词牌要求创作
+2. 注意平仄、押韵、对仗等格律要求
+3. 意境优美，符合古典诗词风格和传统
+4. 对于词牌，必须严格按照该词牌的字数、句数、平仄要求填词
+5. 返回JSON格式：
 {
   "content": "创作的诗词内容",
   "explanation": "诗词的意境和主题解释",
-  "styleAnalysis": "格律和技法分析"
+  "styleAnalysis": "详细的格律、平仄、押韵分析"
 }`
       },
       {
         role: 'user',
-        content: `请创作一首${stylePrompts[style as keyof typeof stylePrompts] || '古典诗词'}，主题关键词：${keywords}`
+        content: `请创作一首${getStylePrompt(style)}，主题关键词：${keywords}。请严格按照${styleName}的格律要求创作。`
       }
     ];
 
