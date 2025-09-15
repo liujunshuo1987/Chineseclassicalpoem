@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, MessageCircle, X, Lightbulb, ExternalLink } from 'lucide-react';
+import { BookOpen, MessageCircle, X, Lightbulb, ExternalLink, FileText, Send, Loader } from 'lucide-react';
 import { deepseekService } from '../services/deepseekApi';
 
 interface ReaderProps {
@@ -19,6 +19,18 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
   const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [isLoadingAnnotation, setIsLoadingAnnotation] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<{
+    mainText: string;
+    annotations: string;
+    title: string;
+    copyright: string;
+    decorativeElements: string;
+    punctuatedText: string;
+    paragraphs: string[];
+  } | null>(null);
+  const [showAnalysisResult, setShowAnalysisResult] = useState(false);
 
   const handleTextSelection = async (selectedText: string) => {
     if (selectedText.trim().length === 0) return;
@@ -49,6 +61,30 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
       });
     } finally {
       setIsLoadingAnnotation(false);
+    }
+  };
+
+  const analyzeInputText = async () => {
+    if (!inputText.trim()) return;
+
+    setIsAnalyzing(true);
+    try {
+      const analysis = await deepseekService.analyzeAncientBookText(inputText);
+      setAnalysisResult(analysis);
+      setShowAnalysisResult(true);
+    } catch (error) {
+      console.error('Failed to analyze text:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const useAnalyzedText = () => {
+    if (analysisResult?.punctuatedText) {
+      // This would typically call a prop function to update the main text
+      // For now, we'll just close the analysis result
+      setShowAnalysisResult(false);
+      setInputText('');
     }
   };
 
@@ -96,7 +132,7 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
       </div>
 
       {/* Reading Area */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
         <div className="flex items-center space-x-3 mb-6">
           <BookOpen className="w-6 h-6 text-indigo-600" />
           <h3 className="text-xl font-bold text-gray-900">
@@ -117,6 +153,46 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Text Input Section */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+        <div className="flex items-center space-x-3 mb-6">
+          <FileText className="w-6 h-6 text-purple-600" />
+          <h3 className="text-xl font-bold text-gray-900">
+            {isEnglish ? 'Analyze Raw Text' : '分析原始文本'}
+          </h3>
+        </div>
+        
+        <div className="space-y-4">
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={isEnglish 
+              ? 'Paste unannotated classical Chinese text here for AI analysis...'
+              : '在此粘贴未加标点的古典中文文本进行AI分析...'
+            }
+            className="w-full h-32 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+          />
+          
+          <button
+            onClick={analyzeInputText}
+            disabled={!inputText.trim() || isAnalyzing}
+            className="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader className="w-5 h-5 animate-spin" />
+                <span>{isEnglish ? 'Analyzing with AI...' : 'AI分析中...'}</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                <span>{isEnglish ? 'Analyze Text' : '分析文本'}</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Reading Tips */}
@@ -214,6 +290,126 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
                   className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
                 >
                   {isEnglish ? 'Close' : '關閉'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analysis Result Modal */}
+      {showAnalysisResult && analysisResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-6 h-6 text-purple-600" />
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {isEnglish ? 'Text Analysis Results' : '文本分析结果'}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowAnalysisResult(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Title Section */}
+                {analysisResult.title && (
+                  <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+                    <h4 className="font-semibold text-amber-900 mb-2">
+                      {isEnglish ? 'Title' : '标题'}
+                    </h4>
+                    <div className="text-lg font-serif text-amber-800">
+                      {analysisResult.title}
+                    </div>
+                  </div>
+                )}
+
+                {/* Main Text Section */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-3">
+                    {isEnglish ? 'Main Text (Punctuated)' : '正文（已加标点）'}
+                  </h4>
+                  <div className="text-lg font-serif text-blue-800 leading-relaxed">
+                    {analysisResult.punctuatedText}
+                  </div>
+                </div>
+
+                {/* Paragraphs Section */}
+                {analysisResult.paragraphs && analysisResult.paragraphs.length > 1 && (
+                  <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200">
+                    <h4 className="font-semibold text-cyan-900 mb-3">
+                      {isEnglish ? 'Paragraphs' : '分段'}
+                    </h4>
+                    <div className="space-y-3">
+                      {analysisResult.paragraphs.map((paragraph, index) => (
+                        <div key={index} className="p-3 bg-white rounded-lg border border-cyan-100">
+                          <div className="text-sm font-medium text-cyan-700 mb-1">
+                            {isEnglish ? `Paragraph ${index + 1}` : `第${index + 1}段`}
+                          </div>
+                          <div className="font-serif text-cyan-800 leading-relaxed">
+                            {paragraph}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Annotations Section */}
+                {analysisResult.annotations && (
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                    <h4 className="font-semibold text-green-900 mb-2">
+                      {isEnglish ? 'Annotations' : '注释'}
+                    </h4>
+                    <div className="text-sm font-serif text-green-800 leading-relaxed">
+                      {analysisResult.annotations}
+                    </div>
+                  </div>
+                )}
+
+                {/* Copyright/Publication Info */}
+                {analysisResult.copyright && (
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                    <h4 className="font-semibold text-purple-900 mb-2">
+                      {isEnglish ? 'Publication Info' : '版权信息'}
+                    </h4>
+                    <div className="text-sm text-purple-800">
+                      {analysisResult.copyright}
+                    </div>
+                  </div>
+                )}
+
+                {/* Decorative Elements */}
+                {analysisResult.decorativeElements && (
+                  <div className="p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-200">
+                    <h4 className="font-semibold text-rose-900 mb-2">
+                      {isEnglish ? 'Decorative Elements' : '装饰元素'}
+                    </h4>
+                    <div className="text-sm text-rose-800">
+                      {analysisResult.decorativeElements}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={useAnalyzedText}
+                  className="flex-1 bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 transition-colors"
+                >
+                  {isEnglish ? 'Use This Analysis' : '使用此分析'}
+                </button>
+                <button
+                  onClick={() => setShowAnalysisResult(false)}
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  {isEnglish ? 'Close' : '关闭'}
                 </button>
               </div>
             </div>
