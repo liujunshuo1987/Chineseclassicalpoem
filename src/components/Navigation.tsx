@@ -1,0 +1,73 @@
+import React from 'react';
+import { Home, Camera, BookOpen, PenTool } from 'lucide-react';
+
+type Page = 'home' | 'scanner' | 'reader' | 'creator';
+
+interface NavigationProps {
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
+  isEnglish: boolean;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate, isEnglish }) => {
+  const navItems = [
+    {
+      id: 'home' as Page,
+      icon: Home,
+      labelEn: 'Home',
+      labelZh: '首頁'
+    },
+    {
+      id: 'scanner' as Page,
+      icon: Camera,
+      labelEn: 'Scan',
+      labelZh: '掃描'
+    },
+    {
+      id: 'reader' as Page,
+      icon: BookOpen,
+      labelEn: 'Read',
+      labelZh: '閱讀'
+    },
+    {
+      id: 'creator' as Page,
+      icon: PenTool,
+      labelEn: 'Create',
+      labelZh: '創作'
+    }
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-gray-200 z-40">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex items-center justify-around py-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentPage === item.id;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`flex flex-col items-center space-y-1 py-2 px-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-25'
+                }`}
+              >
+                <Icon 
+                  className={`w-6 h-6 ${isActive ? 'scale-110' : ''} transition-transform`} 
+                />
+                <span className="text-xs font-medium">
+                  {isEnglish ? item.labelEn : item.labelZh}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navigation;
