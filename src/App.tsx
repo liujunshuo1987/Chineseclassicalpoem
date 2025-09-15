@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, BookOpen, PenTool, Home, Languages, Settings } from 'lucide-react';
+import { Camera, BookOpen, PenTool, Home, Languages, Settings, Info, ChevronDown, User } from 'lucide-react';
 import HomePage from './components/HomePage';
 import Scanner from './components/Scanner';
 import Reader from './components/Reader';
@@ -14,6 +14,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [isEnglish, setIsEnglish] = useState(false);
   const [processedText, setProcessedText] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const toggleLanguage = () => {
     setIsEnglish(!isEnglish);
@@ -24,6 +25,10 @@ function App() {
     setCurrentPage('reader');
   };
 
+  const handleMenuItemClick = (page: Page) => {
+    setCurrentPage(page);
+    setShowDropdown(false);
+  };
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
@@ -57,15 +62,50 @@ function App() {
                 {isEnglish ? 'Classical Chinese Literature' : '古典文學'}
               </h1>
             </div>
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 transition-colors"
-            >
-              <Languages className="w-4 h-4 text-indigo-600" />
-              <span className="text-sm font-medium text-indigo-700">
-                {isEnglish ? '中文' : 'EN'}
-              </span>
-            </button>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 transition-colors"
+              >
+                <Languages className="w-4 h-4 text-indigo-600" />
+                <span className="text-sm font-medium text-indigo-700">
+                  {isEnglish ? '中文' : 'EN'}
+                </span>
+              </button>
+              
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  <User className="w-4 h-4 text-gray-600" />
+                  <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <button
+                      onClick={() => handleMenuItemClick('settings')}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <Settings className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {isEnglish ? 'API Settings' : 'API 設置'}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => handleMenuItemClick('about')}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <Info className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {isEnglish ? 'About Developer' : '關於開發者'}
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </header>
