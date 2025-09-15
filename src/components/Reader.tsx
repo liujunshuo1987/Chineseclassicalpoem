@@ -201,6 +201,46 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
         </p>
       </div>
 
+      {/* Text Input Section */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+        <div className="flex items-center space-x-3 mb-6">
+          <FileText className="w-6 h-6 text-purple-600" />
+          <h3 className="text-xl font-bold text-gray-900">
+            {isEnglish ? 'Analyze Raw Text' : '分析原始文本'}
+          </h3>
+        </div>
+        
+        <div className="space-y-4">
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={isEnglish 
+              ? 'Paste unannotated classical Chinese text here for AI analysis...'
+              : '在此粘贴未加标点的古典中文文本进行AI分析...'
+            }
+            className="w-full h-32 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+          />
+          
+          <button
+            onClick={analyzeInputText}
+            disabled={!inputText.trim() || isAnalyzing}
+            className="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader className="w-5 h-5 animate-spin" />
+                <span>{isEnglish ? 'Analyzing with AI...' : 'AI分析中...'}</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                <span>{isEnglish ? 'Analyze Text' : '分析文本'}</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Reading Area */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
         <div className="flex items-center space-x-3 mb-6">
@@ -253,46 +293,6 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Text Input Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <FileText className="w-6 h-6 text-purple-600" />
-          <h3 className="text-xl font-bold text-gray-900">
-            {isEnglish ? 'Analyze Raw Text' : '分析原始文本'}
-          </h3>
-        </div>
-        
-        <div className="space-y-4">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder={isEnglish 
-              ? 'Paste unannotated classical Chinese text here for AI analysis...'
-              : '在此粘贴未加标点的古典中文文本进行AI分析...'
-            }
-            className="w-full h-32 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-          />
-          
-          <button
-            onClick={analyzeInputText}
-            disabled={!inputText.trim() || isAnalyzing}
-            className="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader className="w-5 h-5 animate-spin" />
-                <span>{isEnglish ? 'Analyzing with AI...' : 'AI分析中...'}</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-5 h-5" />
-                <span>{isEnglish ? 'Analyze Text' : '分析文本'}</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Reading Tips */}
