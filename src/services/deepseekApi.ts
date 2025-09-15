@@ -61,6 +61,73 @@ class DeepSeekService {
     return await this.callAPI(messages);
   }
 
+  async analyzeAncientBookText(rawText: string): Promise<{
+    mainText: string;
+    annotations: string;
+    title: string;
+    copyright: string;
+    decorativeElements: string;
+    punctuatedText: string;
+    paragraphs: string[];
+  }> {
+    const messages: DeepSeekMessage[] = [
+      {
+        role: 'system',
+        content: `你是一个古籍文献专家。请分析古书页面的OCR文本，识别并分类不同的文本元素：
+1. 正文 - 主要的古典文本内容
+2. 注释 - 小字注释、夹注、眉批等
+3. 标题 - 篇名、章节标题
+4. 版权信息 - 刻印信息、出版信息
+5. 装饰元素 - 花边、符号等非文字内容
+
+同时请：
+- 为正文添加适当的标点符号（句读）
+- 将正文按意义分段
+
+请以JSON格式返回：
+{
+  "mainText": "识别出的正文内容",
+  "annotations": "注释内容",
+  "title": "标题内容", 
+  "copyright": "版权或刻印信息",
+  "decorativeElements": "装饰元素描述",
+  "punctuatedText": "加标点的正文",
+  "paragraphs": ["分段后的正文数组"]
+}`
+      },
+      {
+        role: 'user',
+        content: `请分析以下古书OCR文本：\n\n${rawText}`
+      }
+    ];
+
+    try {
+      const response = await this.callAPI(messages);
+      const cleanedResponse = response.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleanedResponse);
+      return {
+        mainText: parsed.mainText || '',
+        annotations: parsed.annotations || '',
+        title: parsed.title || '',
+        copyright: parsed.copyright || '',
+        decorativeElements: parsed.decorativeElements || '',
+        punctuatedText: parsed.punctuatedText || rawText,
+        paragraphs: parsed.paragraphs || [rawText]
+      };
+    } catch (error) {
+      console.error('Failed to parse ancient book analysis:', error);
+      return {
+        mainText: rawText,
+        annotations: '',
+        title: '',
+        copyright: '',
+        decorativeElements: '',
+        punctuatedText: rawText,
+        paragraphs: [rawText]
+      };
+    }
+  }
+
   async annotateText(selectedText: string, context: string = ''): Promise<{
     explanation: string;
     translation: string;

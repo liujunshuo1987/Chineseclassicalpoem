@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Camera, Upload, Loader, CheckCircle, AlertCircle } from 'lucide-react';
+import { Camera, Upload, Loader, CheckCircle, AlertCircle, BookOpen, FileText, Tag, Copyright, Sparkles } from 'lucide-react';
 import { deepseekService } from '../services/deepseekApi';
+import { ocrService } from '../services/ocrApi';
 
 interface ScannerProps {
   isEnglish: boolean;
@@ -10,15 +11,16 @@ interface ScannerProps {
 const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [ocrResult, setOcrResult] = useState('');
+  const [analysisResult, setAnalysisResult] = useState<{
+    mainText: string;
+    annotations: string;
+    title: string;
+    copyright: string;
+    decorativeElements: string;
+    punctuatedText: string;
+    paragraphs: string[];
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Mock OCR raw text (simulating OCR output with errors)
-  const mockOCRTexts = [
-    '子曰学而时习之不亦说乎有朋自远方来不亦乐乎人不知而不愠不亦君子乎',
-    '天下皆知美之为美斯恶已皆知善之为善斯不善已故有无相生难易相成长短相较高下相倾音声相和前后相随',
-    '昔者庄周梦为胡蝶栩栩然胡蝶也自喻适志与不知周也俄然觉则蘧蘧然周也不知周之梦为胡蝶与胡蝶之梦为周与'
-  ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -26,38 +28,39 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedImage(e.target?.result as string);
-        processImage();
+        processImage(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const processImage = async () => {
+  const processImage = async (imageFile: File) => {
     setIsProcessing(true);
-    setOcrResult('');
+    setAnalysisResult(null);
     setError(null);
 
     try {
-      // Simulate OCR processing delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Get mock OCR raw text
-      const rawOCRText = mockOCRTexts[Math.floor(Math.random() * mockOCRTexts.length)];
+      // Step 1: OCR processing
+      const rawOCRText = await ocrService.processImage(imageFile);
       
-      // Use DeepSeek API to correct and punctuate the text
-      const correctedText = await deepseekService.correctOCRText(rawOCRText);
-      setOcrResult(correctedText);
+      if (!rawOCRText.trim()) {
+        throw new Error(isEnglish ? 'No text detected in image' : '图像中未检测到文字');
+      }
+
+      // Step 2: AI analysis and categorization
+      const analysis = await deepseekService.analyzeAncientBookText(rawOCRText);
+      setAnalysisResult(analysis);
     } catch (err) {
       console.error('OCR processing error:', err);
-      setError(isEnglish ? 'Failed to process image. Please try again.' : '图像处理失败，请重试。');
+      setError(err instanceof Error ? err.message : (isEnglish ? 'Failed to process image. Please try again.' : '图像处理失败，请重试。'));
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleViewInReader = () => {
-    if (ocrResult) {
-      onNavigateToReader(ocrResult);
+    if (analysisResult?.punctuatedText) {
+      onNavigateToReader(analysisResult.punctuatedText);
     }
   };
 
@@ -149,23 +152,87 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
       )}
 
       {/* Results */}
-      {ocrResult && (
+      {analysisResult && (
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="flex items-center space-x-3 mb-6">
             <CheckCircle className="w-6 h-6 text-green-600" />
             <h3 className="text-xl font-bold text-gray-900">
-              {isEnglish ? 'Processing Complete' : '處理完成'}
+              {isEnglish ? 'Ancient Book Analysis Complete' : '古籍分析完成'}
             </h3>
           </div>
           
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
-            <h4 className="font-semibold text-gray-900 mb-3">
-              {isEnglish ? 'Processed Text:' : '處理後文本：'}
-            </h4>
-            <div className="text-lg font-serif text-gray-800 leading-relaxed">
-              {ocrResult}
+          {/* Title Section */}
+          {analysisResult.title && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <Tag className="w-5 h-5 text-amber-600" />
+                <h4 className="font-semibold text-amber-900">
+                  {isEnglish ? 'Title' : '標題'}
+                </h4>
+              </div>
+              <div className="text-lg font-serif text-amber-800">
+                {analysisResult.title}
+              </div>
+            </div>
+          )}
+
+          {/* Main Text Section */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+            <div className="flex items-center space-x-2 mb-3">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              <h4 className="font-semibold text-blue-900">
+                {isEnglish ? 'Main Text (Punctuated)' : '正文（已加標點）'}
+              </h4>
+            </div>
+            <div className="text-lg font-serif text-blue-800 leading-relaxed">
+              {analysisResult.punctuatedText}
             </div>
           </div>
+
+          {/* Annotations Section */}
+          {analysisResult.annotations && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <FileText className="w-5 h-5 text-green-600" />
+                <h4 className="font-semibold text-green-900">
+                  {isEnglish ? 'Annotations' : '註釋'}
+                </h4>
+              </div>
+              <div className="text-sm font-serif text-green-800 leading-relaxed">
+                {analysisResult.annotations}
+              </div>
+            </div>
+          )}
+
+          {/* Copyright/Publication Info */}
+          {analysisResult.copyright && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <Copyright className="w-5 h-5 text-purple-600" />
+                <h4 className="font-semibold text-purple-900">
+                  {isEnglish ? 'Publication Info' : '版權信息'}
+                </h4>
+              </div>
+              <div className="text-sm text-purple-800">
+                {analysisResult.copyright}
+              </div>
+            </div>
+          )}
+
+          {/* Decorative Elements */}
+          {analysisResult.decorativeElements && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <Sparkles className="w-5 h-5 text-rose-600" />
+                <h4 className="font-semibold text-rose-900">
+                  {isEnglish ? 'Decorative Elements' : '裝飾元素'}
+                </h4>
+              </div>
+              <div className="text-sm text-rose-800">
+                {analysisResult.decorativeElements}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-4">
             <button
@@ -177,7 +244,7 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
             <button
               onClick={() => {
                 setUploadedImage(null);
-                setOcrResult('');
+                setAnalysisResult(null);
                 setError(null);
               }}
               className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
@@ -198,8 +265,8 @@ const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
             </h4>
             <p className="text-amber-700 text-sm">
               {isEnglish 
-                ? 'Using DeepSeek AI for intelligent text correction and punctuation. OCR simulation with real AI processing.'
-                : '使用DeepSeek AI進行智能文本校正和標點。OCR模擬配合真實AI處理。'
+                ? 'Using specialized ancient book OCR with DeepSeek AI for comprehensive text analysis and categorization.'
+                : '使用專業古籍OCR配合DeepSeek AI進行全面文本分析和分類。'
               }
             </p>
           </div>
