@@ -1,7 +1,7 @@
 import React from 'react';
-import { Home, Camera, BookOpen, PenTool, Settings } from 'lucide-react';
+import { Home, Camera, BookOpen, PenTool, Settings, Info } from 'lucide-react';
 
-type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings';
+type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings' | 'about';
 
 interface NavigationProps {
   currentPage: Page;
@@ -40,6 +40,12 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate, isEngl
       icon: Settings,
       labelEn: 'Settings',
       labelZh: '設置'
+    },
+    {
+      id: 'about' as Page,
+      icon: Info,
+      labelEn: 'About',
+      labelZh: '關於'
     }
   ];
 

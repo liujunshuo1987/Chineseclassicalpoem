@@ -5,9 +5,10 @@ import Scanner from './components/Scanner';
 import Reader from './components/Reader';
 import Creator from './components/Creator';
 import SettingsPage from './components/SettingsPage';
+import AboutPage from './components/AboutPage';
 import Navigation from './components/Navigation';
 
-type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings';
+type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings' | 'about';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -35,6 +36,8 @@ function App() {
         return <Creator isEnglish={isEnglish} />;
       case 'settings':
         return <SettingsPage isEnglish={isEnglish} />;
+      case 'about':
+        return <AboutPage isEnglish={isEnglish} />;
       default:
         return <HomePage isEnglish={isEnglish} onNavigate={setCurrentPage} />;
     }
