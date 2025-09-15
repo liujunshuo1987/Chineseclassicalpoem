@@ -24,11 +24,33 @@ class OCRService {
   private apiUrl: string;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OCR_API_KEY || '30a87186a0d26670b6e9558515b25f';
-    this.apiUrl = import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image';
+    this.updateSettings();
+  }
+
+  private updateSettings() {
+    // Check for user-configured settings first
+    const savedSettings = localStorage.getItem('apiSettings');
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings);
+        this.apiKey = settings.ocrApiKey || import.meta.env.VITE_OCR_API_KEY || '30a87186a0d26670b6e9558515b25f';
+        this.apiUrl = settings.ocrApiUrl || import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image';
+      } catch (error) {
+        // Fallback to environment variables
+        this.apiKey = import.meta.env.VITE_OCR_API_KEY || '30a87186a0d26670b6e9558515b25f';
+        this.apiUrl = import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image';
+      }
+    } else {
+      // Use environment variables as default
+      this.apiKey = import.meta.env.VITE_OCR_API_KEY || '30a87186a0d26670b6e9558515b25f';
+      this.apiUrl = import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image';
+    }
   }
 
   async processImage(imageFile: File): Promise<string> {
+    // Update settings before each request to get latest configuration
+    this.updateSettings();
+    
     const formData = new FormData();
     formData.append('file', imageFile);
     formData.append('apikey', this.apiKey);

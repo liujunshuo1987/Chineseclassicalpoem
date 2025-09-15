@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY;
-const DEEPSEEK_API_URL = import.meta.env.VITE_DEEPSEEK_API_URL;
 
 interface DeepSeekMessage {
   role: 'system' | 'user' | 'assistant';
@@ -17,10 +15,38 @@ interface DeepSeekResponse {
 }
 
 class DeepSeekService {
+  private getSettings() {
+    // Check for user-configured settings first
+    const savedSettings = localStorage.getItem('apiSettings');
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings);
+        return {
+          apiKey: settings.llmApiKey || import.meta.env.VITE_DEEPSEEK_API_KEY,
+          apiUrl: settings.llmApiUrl || import.meta.env.VITE_DEEPSEEK_API_URL
+        };
+      } catch (error) {
+        // Fallback to environment variables
+        return {
+          apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
+          apiUrl: import.meta.env.VITE_DEEPSEEK_API_URL
+        };
+      }
+    } else {
+      // Use environment variables as default
+      return {
+        apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
+        apiUrl: import.meta.env.VITE_DEEPSEEK_API_URL
+      };
+    }
+  }
+
   private async callAPI(messages: DeepSeekMessage[]): Promise<string> {
+    const { apiKey, apiUrl } = this.getSettings();
+    
     try {
       const response = await axios.post<DeepSeekResponse>(
-        DEEPSEEK_API_URL,
+        apiUrl,
         {
           model: 'deepseek-chat',
           messages,
@@ -29,7 +55,7 @@ class DeepSeekService {
         },
         {
           headers: {
-            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
         }

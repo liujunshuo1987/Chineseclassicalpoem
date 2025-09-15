@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Camera, BookOpen, PenTool, Home, Languages } from 'lucide-react';
+import { Camera, BookOpen, PenTool, Home, Languages, Settings } from 'lucide-react';
 import HomePage from './components/HomePage';
 import Scanner from './components/Scanner';
 import Reader from './components/Reader';
 import Creator from './components/Creator';
+import SettingsPage from './components/SettingsPage';
 import Navigation from './components/Navigation';
 
-type Page = 'home' | 'scanner' | 'reader' | 'creator';
+type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -32,6 +33,8 @@ function App() {
         return <Reader isEnglish={isEnglish} text={processedText} />;
       case 'creator':
         return <Creator isEnglish={isEnglish} />;
+      case 'settings':
+        return <SettingsPage isEnglish={isEnglish} />;
       default:
         return <HomePage isEnglish={isEnglish} onNavigate={setCurrentPage} />;
     }
