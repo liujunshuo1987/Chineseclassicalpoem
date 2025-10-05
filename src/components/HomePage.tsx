@@ -90,15 +90,20 @@ const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, 
               onClick={feature.action}
               className="group cursor-pointer bg-white rounded-xl md:rounded-2xl p-4 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
             >
-              <div className={`w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r ${feature.color} rounded-xl md:rounded-2xl flex items-center justify-center mb-3 md:mb-6 group-hover:scale-110 transition-transform`}>
-                <Icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
+              {/* Mobile: Horizontal centered layout */}
+              <div className="flex md:block items-center md:items-start justify-center md:justify-start gap-3 md:gap-0">
+                <div className={`w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r ${feature.color} rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 md:mb-6 group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
+                </div>
+                <div className="flex-1 md:flex-none text-left md:text-left">
+                  <h3 className="text-sm md:text-2xl font-semibold text-gray-900 mb-1 md:mb-3">
+                    {isEnglish ? feature.titleEn : feature.titleZh}
+                  </h3>
+                  <p className="text-xs md:text-base text-gray-600 leading-relaxed">
+                    {isEnglish ? feature.descEn : feature.descZh}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-base md:text-2xl font-semibold text-gray-900 mb-2 md:mb-3">
-                {isEnglish ? feature.titleEn : feature.titleZh}
-              </h3>
-              <p className="text-xs md:text-base text-gray-600 leading-relaxed">
-                {isEnglish ? feature.descEn : feature.descZh}
-              </p>
             </div>
           );
         })}
