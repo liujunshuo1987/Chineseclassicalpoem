@@ -41,7 +41,7 @@
     - Enable RLS on all tables
     - Users can only access their own data
     - Public read access for membership plans
-</sql>
+*/
 
 -- Create custom types
 CREATE TYPE membership_type AS ENUM ('visitor', 'trial', 'monthly', 'annual', 'expired');
