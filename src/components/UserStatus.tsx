@@ -28,9 +28,9 @@ const UserStatus: React.FC<UserStatusProps> = ({ isEnglish, onShowAuth, onShowMe
   }, []);
 
   const handleStartTrial = () => {
-    if (authService.startTrial()) {
+    authService.startTrial().then((success) => {
       // Trial started successfully
-    }
+    });
   };
 
   const getMembershipStatusText = () => {

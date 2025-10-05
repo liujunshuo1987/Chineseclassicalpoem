@@ -15,7 +15,15 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, isEn
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
 
-  const plans = authService.getMembershipPlans();
+  const [plans, setPlans] = useState<MembershipPlan[]>([]);
+
+  useEffect(() => {
+    const loadPlans = async () => {
+      const membershipPlans = await authService.getMembershipPlans();
+      setPlans(membershipPlans);
+    };
+    loadPlans();
+  }, []);
 
   if (!isOpen) return null;
 
