@@ -85,10 +85,17 @@ class AuthService {
   async register(email: string, password: string, username: string): Promise<User> {
     const { user } = await databaseService.signUp(email, password, username);
     if (!user) throw new Error('Registration failed');
-    
+
     // Profile will be created automatically by the database trigger
+    // Wait a bit for the trigger to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
     await this.loadUserProfile(user.id);
-    return this.currentUser!;
+
+    if (!this.currentUser) {
+      throw new Error('Failed to create user profile');
+    }
+
+    return this.currentUser;
   }
 
   async logout() {
