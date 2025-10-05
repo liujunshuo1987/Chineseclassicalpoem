@@ -18,10 +18,10 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate, isEngl
       labelZh: '首頁'
     },
     {
-      id: 'scanner' as Page,
-      icon: Camera,
-      labelEn: 'Scan',
-      labelZh: '掃描'
+      id: 'creator' as Page,
+      icon: PenTool,
+      labelEn: 'Create',
+      labelZh: '創作'
     },
     {
       id: 'reader' as Page,
@@ -30,10 +30,10 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate, isEngl
       labelZh: '閱讀'
     },
     {
-      id: 'creator' as Page,
-      icon: PenTool,
-      labelEn: 'Create',
-      labelZh: '創作'
+      id: 'scanner' as Page,
+      icon: Camera,
+      labelEn: 'Scan',
+      labelZh: '掃描'
     }
   ];
 

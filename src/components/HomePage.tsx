@@ -13,13 +13,13 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, onShowMembership }) => {
   const features = [
     {
-      icon: Camera,
-      titleEn: 'Scan Texts',
-      titleZh: '掃描文本',
-      descEn: 'Capture and digitize classical Chinese texts with OCR',
-      descZh: '使用OCR技術捕捉並數位化古典中文文本',
-      color: 'from-blue-500 to-cyan-500',
-      action: () => onNavigate('scanner')
+      icon: PenTool,
+      titleEn: 'Generate Poetry',
+      titleZh: '創作詩詞',
+      descEn: 'Create classical Chinese poems in traditional styles',
+      descZh: '創作傳統風格的古典中文詩詞',
+      color: 'from-purple-500 to-pink-500',
+      action: () => onNavigate('creator')
     },
     {
       icon: BookOpen,
@@ -31,13 +31,13 @@ const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, 
       action: () => onNavigate('reader')
     },
     {
-      icon: PenTool,
-      titleEn: 'Generate Poetry',
-      titleZh: '創作詩詞',
-      descEn: 'Create classical Chinese poems in traditional styles',
-      descZh: '創作傳統風格的古典中文詩詞',
-      color: 'from-purple-500 to-pink-500',
-      action: () => onNavigate('creator')
+      icon: Camera,
+      titleEn: 'Scan Texts',
+      titleZh: '掃描文本',
+      descEn: 'Capture and digitize classical Chinese texts with OCR',
+      descZh: '使用OCR技術捕捉並數位化古典中文文本',
+      color: 'from-blue-500 to-cyan-500',
+      action: () => onNavigate('scanner')
     }
   ];
 
