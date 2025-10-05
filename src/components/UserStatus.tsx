@@ -35,7 +35,12 @@ const UserStatus: React.FC<UserStatusProps> = ({ isEnglish, onShowAuth, onShowMe
 
   const getMembershipStatusText = () => {
     if (!user) return isEnglish ? 'Guest' : '访客';
-    
+
+    // Show admin status first
+    if (user.role === 'admin') {
+      return isEnglish ? 'Administrator' : '管理员';
+    }
+
     switch (user.membershipType) {
       case 'visitor':
         return isEnglish ? 'Visitor' : '访客';
@@ -54,7 +59,12 @@ const UserStatus: React.FC<UserStatusProps> = ({ isEnglish, onShowAuth, onShowMe
 
   const getMembershipColor = () => {
     if (!user) return 'text-gray-600';
-    
+
+    // Admin gets special color
+    if (user.role === 'admin') {
+      return 'text-green-600 font-semibold';
+    }
+
     switch (user.membershipType) {
       case 'visitor':
         return 'text-gray-600';
@@ -131,8 +141,23 @@ const UserStatus: React.FC<UserStatusProps> = ({ isEnglish, onShowAuth, onShowMe
         </div>
       )}
 
+      {/* Admin Badge */}
+      {user.role === 'admin' && (
+        <div className="bg-green-50 rounded-lg p-3 mb-3 border border-green-200">
+          <div className="flex items-center space-x-2">
+            <Crown className="w-4 h-4 text-green-600" />
+            <span className="text-sm font-semibold text-green-900">
+              {isEnglish ? 'Full Access' : '完全权限'}
+            </span>
+          </div>
+          <p className="text-xs text-green-700 mt-1">
+            {isEnglish ? 'Unlimited features & no restrictions' : '无限功能 & 无限制'}
+          </p>
+        </div>
+      )}
+
       {/* Generation Limits */}
-      {permissions && (
+      {permissions && !permissions.isAdmin && (
         <div className="bg-gray-50 rounded-lg p-3 mb-3">
           <div className="flex items-center space-x-2 mb-1">
             <Zap className="w-4 h-4 text-gray-600" />
@@ -141,7 +166,7 @@ const UserStatus: React.FC<UserStatusProps> = ({ isEnglish, onShowAuth, onShowMe
             </span>
           </div>
           <p className="text-xs text-gray-700">
-            {permissions.dailyLimit === 999 
+            {permissions.dailyLimit === 999
               ? (isEnglish ? 'Unlimited' : '无限制')
               : `${permissions.remainingGenerations}/${permissions.dailyLimit}`
             }
@@ -149,27 +174,29 @@ const UserStatus: React.FC<UserStatusProps> = ({ isEnglish, onShowAuth, onShowMe
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="space-y-2">
-        {user.membershipType === 'visitor' && (
-          <button
-            onClick={handleStartTrial}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
-          >
-            {isEnglish ? 'Start 7-Day Trial' : '开始7天试用'}
-          </button>
-        )}
-        
-        {(user.membershipType === 'visitor' || user.membershipType === 'trial' || user.membershipType === 'expired') && (
-          <button
-            onClick={onShowMembership}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors text-sm flex items-center justify-center space-x-1"
-          >
-            <Crown className="w-4 h-4" />
-            <span>{isEnglish ? 'Upgrade' : '升级会员'}</span>
-          </button>
-        )}
-      </div>
+      {/* Action Buttons - Hide for admins */}
+      {user.role !== 'admin' && (
+        <div className="space-y-2">
+          {user.membershipType === 'visitor' && (
+            <button
+              onClick={handleStartTrial}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+            >
+              {isEnglish ? 'Start 7-Day Trial' : '开始7天试用'}
+            </button>
+          )}
+
+          {(user.membershipType === 'visitor' || user.membershipType === 'trial' || user.membershipType === 'expired') && (
+            <button
+              onClick={onShowMembership}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors text-sm flex items-center justify-center space-x-1"
+            >
+              <Crown className="w-4 h-4" />
+              <span>{isEnglish ? 'Upgrade' : '升级会员'}</span>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

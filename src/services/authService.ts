@@ -40,6 +40,7 @@ class AuthService {
           username: profile.username,
           email: profile.email,
           membershipType: profile.membership_type as any,
+          role: profile.role || 'user',
           trialStartDate: profile.trial_start_date ? new Date(profile.trial_start_date) : undefined,
           expiryDate: profile.expiry_date ? new Date(profile.expiry_date) : undefined,
           generationsUsed: profile.generations_used,
@@ -119,18 +120,46 @@ class AuthService {
         canExport: false,
         canGenerate: true,
         dailyLimit: 1,
-        remainingGenerations: 1
+        remainingGenerations: 1,
+        isAdmin: false
       };
     }
 
-    return databaseService.getUserPermissions(this.userProfile);
+    const permissions = databaseService.getUserPermissions(this.userProfile);
+    const isAdmin = this.currentUser.role === 'admin';
+
+    // Admins have unlimited permissions
+    if (isAdmin) {
+      return {
+        ...permissions,
+        canCopy: true,
+        canExport: true,
+        canGenerate: true,
+        dailyLimit: 999999,
+        remainingGenerations: 999999,
+        isAdmin: true
+      };
+    }
+
+    return {
+      ...permissions,
+      isAdmin: false
+    };
   }
 
   async incrementGenerationCount() {
     if (this.currentUser) {
+      // Admins don't need to track generation count
+      if (this.currentUser.role === 'admin') {
+        return;
+      }
       await databaseService.incrementGenerationCount(this.currentUser.id);
       await this.loadUserProfile(this.currentUser.id);
     }
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.role === 'admin';
   }
 
   async getMembershipPlans(): Promise<MembershipPlan[]> {

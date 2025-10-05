@@ -37,7 +37,10 @@ const ProtectedContent: React.FC<ProtectedContentProps> = ({
 
   const canAccess = () => {
     if (!permissions) return false;
-    
+
+    // Admins have access to everything
+    if (permissions.isAdmin) return true;
+
     switch (type) {
       case 'copy':
         return permissions.canCopy;

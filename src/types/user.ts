@@ -3,6 +3,7 @@ export interface User {
   username: string;
   email: string;
   membershipType: 'visitor' | 'trial' | 'monthly' | 'annual' | 'expired';
+  role?: 'user' | 'admin';
   trialStartDate?: Date;
   expiryDate?: Date;
   generationsUsed: number;
@@ -18,6 +19,7 @@ export interface UserPermissions {
   dailyLimit: number;
   remainingGenerations: number;
   trialDaysRemaining?: number;
+  isAdmin: boolean;
 }
 
 export interface MembershipPlan {
