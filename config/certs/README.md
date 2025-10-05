@@ -1,0 +1,1 @@
+# Payment Certificates\n\nPlace your payment provider certificate files here:\n\n## WeChat Pay\n- apiclient_cert.pem\n- apiclient_key.pem\n- apiclient_cert.p12\n\n## Alipay\n- alipay_private_key.pem\n- alipay_public_key.pem\n\n**IMPORTANT**: These files are for server-side use only and will be accessed by Edge Functions.

@@ -10,10 +10,6 @@ interface APISettings {
   ocrApiUrl: string;
   llmApiKey: string;
   llmApiUrl: string;
-  wechatPayKey: string;
-  wechatPayMerchantId: string;
-  alipayAppId: string;
-  alipayPrivateKey: string;
 }
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ isEnglish }) => {
@@ -21,18 +17,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isEnglish }) => {
     ocrApiKey: '',
     ocrApiUrl: '',
     llmApiKey: '',
-    llmApiUrl: '',
-    wechatPayKey: '',
-    wechatPayMerchantId: '',
-    alipayAppId: '',
-    alipayPrivateKey: ''
+    llmApiUrl: ''
   });
   
   const [showKeys, setShowKeys] = useState({
     ocr: false,
-    llm: false,
-    wechatPay: false,
-    alipay: false
+    llm: false
   });
   
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -53,11 +43,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isEnglish }) => {
         ocrApiKey: import.meta.env.VITE_OCR_API_KEY || '',
         ocrApiUrl: import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image',
         llmApiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || '',
-        llmApiUrl: import.meta.env.VITE_DEEPSEEK_API_URL || 'https://api.deepseek.com/chat/completions',
-        wechatPayKey: '',
-        wechatPayMerchantId: '',
-        alipayAppId: '',
-        alipayPrivateKey: ''
+        llmApiUrl: import.meta.env.VITE_DEEPSEEK_API_URL || 'https://api.deepseek.com/chat/completions'
       });
     }
   }, []);
@@ -91,18 +77,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isEnglish }) => {
       ocrApiKey: import.meta.env.VITE_OCR_API_KEY || '',
       ocrApiUrl: import.meta.env.VITE_OCR_API_URL || 'https://api.ocr.space/parse/image',
       llmApiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || '',
-      llmApiUrl: import.meta.env.VITE_DEEPSEEK_API_URL || 'https://api.deepseek.com/chat/completions',
-      wechatPayKey: '',
-      wechatPayMerchantId: '',
-      alipayAppId: '',
-      alipayPrivateKey: ''
+      llmApiUrl: import.meta.env.VITE_DEEPSEEK_API_URL || 'https://api.deepseek.com/chat/completions'
     };
     setSettings(defaultSettings);
     localStorage.removeItem('apiSettings');
     (window as any).__API_SETTINGS__ = defaultSettings;
   };
 
-  const toggleKeyVisibility = (type: 'ocr' | 'llm' | 'wechatPay' | 'alipay') => {
+  const toggleKeyVisibility = (type: 'ocr' | 'llm') => {
     setShowKeys(prev => ({
       ...prev,
       [type]: !prev[type]
@@ -170,94 +152,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isEnglish }) => {
                   placeholder={isEnglish ? 'Enter OCR API endpoint URL' : '輸入OCR API端點網址'}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Settings */}
-          <div className="border border-gray-200 rounded-xl p-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              {isEnglish ? 'Payment Configuration' : '支付配置'}
-            </h4>
-            <div className="space-y-6">
-              {/* WeChat Pay */}
-              <div className="space-y-4">
-                <h5 className="text-md font-medium text-gray-800">
-                  {isEnglish ? 'WeChat Pay' : '微信支付'}
-                </h5>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isEnglish ? 'WeChat Pay Merchant ID' : '微信支付商户号'}
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.wechatPayMerchantId}
-                    onChange={(e) => handleInputChange('wechatPayMerchantId', e.target.value)}
-                    placeholder={isEnglish ? 'Enter WeChat Pay Merchant ID' : '输入微信支付商户号'}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isEnglish ? 'WeChat Pay API Key' : '微信支付API密钥'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showKeys.wechatPay ? 'text' : 'password'}
-                      value={settings.wechatPayKey}
-                      onChange={(e) => handleInputChange('wechatPayKey', e.target.value)}
-                      placeholder={isEnglish ? 'Enter WeChat Pay API Key' : '输入微信支付API密钥'}
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => toggleKeyVisibility('wechatPay')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showKeys.wechatPay ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Alipay */}
-              <div className="space-y-4 pt-4 border-t border-gray-200">
-                <h5 className="text-md font-medium text-gray-800">
-                  {isEnglish ? 'Alipay' : '支付宝'}
-                </h5>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isEnglish ? 'Alipay App ID' : '支付宝应用ID'}
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.alipayAppId}
-                    onChange={(e) => handleInputChange('alipayAppId', e.target.value)}
-                    placeholder={isEnglish ? 'Enter Alipay App ID' : '输入支付宝应用ID'}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isEnglish ? 'Alipay Private Key' : '支付宝私钥'}
-                  </label>
-                  <div className="relative">
-                    <textarea
-                      rows={3}
-                      value={settings.alipayPrivateKey}
-                      onChange={(e) => handleInputChange('alipayPrivateKey', e.target.value)}
-                      placeholder={isEnglish ? 'Enter Alipay Private Key' : '输入支付宝私钥'}
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => toggleKeyVisibility('alipay')}
-                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    >
-                      {showKeys.alipay ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -354,9 +248,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isEnglish }) => {
               <ul className="text-blue-700 space-y-1 text-sm">
                 <li>• {isEnglish ? 'OCR API: Used for processing ancient book images and text recognition' : 'OCR API：用於處理古籍圖像和文字識別'}</li>
                 <li>• {isEnglish ? 'LLM API: Used for text analysis, annotation, and poetry creation' : 'LLM API：用於文本分析、註釋和詩詞創作'}</li>
-                <li>• {isEnglish ? 'Payment Configuration: Add your WeChat Pay and Alipay credentials for real transactions' : '支付配置：添加您的微信支付和支付宝凭证以处理真实交易'}</li>
                 <li>• {isEnglish ? 'Settings are saved locally in your browser' : '設置保存在您的瀏覽器本地'}</li>
                 <li>• {isEnglish ? 'Changes take effect immediately after saving' : '保存後更改立即生效'}</li>
+                <li>• {isEnglish ? 'Payment processing is handled securely on the server' : '支付處理在服務器端安全進行'}</li>
               </ul>
             </div>
           </div>
