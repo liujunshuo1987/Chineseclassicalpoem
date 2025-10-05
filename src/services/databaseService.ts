@@ -140,6 +140,17 @@ class DatabaseService {
     if (error) throw error;
   }
 
+  async getUserOrders(userId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
   // Membership Plans
   async getMembershipPlans(): Promise<MembershipPlan[]> {
     const { data, error } = await supabase

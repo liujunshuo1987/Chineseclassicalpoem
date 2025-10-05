@@ -6,12 +6,13 @@ import Reader from './components/Reader';
 import Creator from './components/Creator';
 import SettingsPage from './components/SettingsPage';
 import AboutPage from './components/AboutPage';
+import AccountPage from './components/AccountPage';
 import Navigation from './components/Navigation';
 import AuthModal from './components/AuthModal';
 import MembershipModal from './components/MembershipModal';
 import UserStatus from './components/UserStatus';
 
-type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings' | 'about';
+type Page = 'home' | 'scanner' | 'reader' | 'creator' | 'settings' | 'about' | 'account';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -70,6 +71,13 @@ function App() {
         return <SettingsPage isEnglish={isEnglish} />;
       case 'about':
         return <AboutPage isEnglish={isEnglish} />;
+      case 'account':
+        return (
+          <AccountPage
+            isEnglish={isEnglish}
+            onShowMembership={() => setShowMembershipModal(true)}
+          />
+        );
       default:
         return <HomePage isEnglish={isEnglish} onNavigate={setCurrentPage} />;
     }
@@ -93,10 +101,10 @@ function App() {
             <div className="flex items-center space-x-3">
               {/* User Status */}
               <div className="hidden md:block">
-                <UserStatus 
+                <UserStatus
                   isEnglish={isEnglish}
                   onShowAuth={() => setShowAuthModal(true)}
-                  onShowMembership={() => setShowMembershipModal(true)}
+                  onNavigateToAccount={() => setCurrentPage('account')}
                 />
               </div>
               
