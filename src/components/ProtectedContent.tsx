@@ -96,64 +96,62 @@ const ProtectedContent: React.FC<ProtectedContentProps> = ({
   };
 
   if (!canAccess()) {
-    return (
-      <div className="relative">
-        {/* Overlay for protected content */}
+    if (type === 'copy') {
+      return (
         <div className="relative">
-          <div className={`${type === 'copy' ? 'select-none pointer-events-none' : ''}`}>
-            {children}
-          </div>
-          
-          {type === 'copy' && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-              <div className="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200 max-w-sm">
-                <Lock className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  {isEnglish ? 'Premium Feature' : '高级功能'}
-                </h4>
-                <p className="text-gray-600 text-sm mb-4">
-                  {isEnglish 
-                    ? 'Sign in and upgrade to copy and export your creations'
-                    : '登录并升级以复制和导出您的作品'
+          <div className="relative">
+            <div className="select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+              {children}
+            </div>
+            <div className="mt-4 text-center">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                <Lock className="w-4 h-4 text-amber-600" />
+                <span className="text-sm text-amber-700">
+                  {isEnglish
+                    ? 'Upgrade to copy and export text'
+                    : '升级会员以复制和导出文本'
                   }
-                </p>
-                <div className="space-y-2">
-                  {!user && (
-                    <button
-                      onClick={onShowAuth}
-                      className="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-sm"
-                    >
-                      {isEnglish ? 'Sign In' : '登录'}
-                    </button>
-                  )}
-                  <button
-                    onClick={onShowMembership}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors text-sm flex items-center justify-center space-x-1"
-                  >
-                    <Crown className="w-4 h-4" />
-                    <span>{isEnglish ? 'Upgrade' : '升级会员'}</span>
-                  </button>
-                </div>
+                </span>
+              </div>
+              <div className="mt-3">
+                <button
+                  onClick={onShowMembership}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors text-sm inline-flex items-center space-x-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>{isEnglish ? 'Upgrade' : '升级会员'}</span>
+                </button>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Action buttons for export/generate */}
-        {(type === 'export' || type === 'generate') && (
-          <div className="mt-4">
-            <button
-              onClick={!user ? onShowAuth : onShowMembership}
-              disabled
-              className="bg-gray-300 text-gray-500 px-6 py-3 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              <Lock className="w-5 h-5" />
-              <span>{getActionText()} - {isEnglish ? 'Premium Only' : '仅限会员'}</span>
-            </button>
           </div>
-        )}
-      </div>
-    );
+        </div>
+      );
+    }
+
+    if (type === 'export') {
+      return (
+        <div className="mt-4">
+          <button
+            onClick={!user ? onShowAuth : onShowMembership}
+            disabled
+            className="bg-gray-300 text-gray-500 px-6 py-3 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            <Lock className="w-5 h-5" />
+            <span>{getActionText()} - {isEnglish ? 'Premium Only' : '仅限会员'}</span>
+          </button>
+        </div>
+      );
+    }
+
+    if (type === 'generate') {
+      return (
+        <div>
+          {children}
+        </div>
+      );
+    }
+
+    return <div>{children}</div>;
   }
 
   // For accessible content, render normally with action buttons

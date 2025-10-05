@@ -180,14 +180,18 @@ class DatabaseService {
     if (profile.membership_type === 'trial' && profile.trial_start) {
       const trialDays = Math.floor((now.getTime() - new Date(profile.trial_start).getTime()) / (1000 * 60 * 60 * 24));
       const remainingDays = Math.max(0, 7 - trialDays);
-      
+
       if (remainingDays > 0) {
+        const lastGenDate = profile.last_generation_date ? new Date(profile.last_generation_date) : null;
+        const isNewDay = !lastGenDate || now.toDateString() !== lastGenDate.toDateString();
+        const dailyUsed = isNewDay ? 0 : profile.daily_generations_used;
+
         permissions = {
-          canCopy: true,
-          canExport: true,
+          canCopy: false,
+          canExport: false,
           canGenerate: true,
-          dailyLimit: 999,
-          remainingGenerations: 999,
+          dailyLimit: 6,
+          remainingGenerations: Math.max(0, 6 - dailyUsed),
           trialDaysRemaining: remainingDays,
           isAdmin: false
         };
