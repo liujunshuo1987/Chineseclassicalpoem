@@ -6,9 +6,11 @@ type Page = 'home' | 'scanner' | 'reader' | 'creator';
 interface HomePageProps {
   isEnglish: boolean;
   onNavigate: (page: Page) => void;
+  onShowAuth: () => void;
+  onShowMembership: () => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate }) => {
+const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, onShowMembership }) => {
   const features = [
     {
       icon: Camera,

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { PenTool, Sparkles, RefreshCw, Copy, Download, AlertCircle } from 'lucide-react';
+import { PenTool, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 import { deepseekService } from '../services/deepseekApi';
+import { authService } from '../services/authService';
+import ProtectedContent from './ProtectedContent';
 
 interface CreatorProps {
   isEnglish: boolean;
+  onShowAuth: () => void;
+  onShowMembership: () => void;
 }
 
 type PoemCategory = 'poetry' | 'ci' | 'couplet' | 'fu';
@@ -21,7 +25,7 @@ interface Poem {
   explanation: string;
 }
 
-const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
+const Creator: React.FC<CreatorProps> = ({ isEnglish, onShowAuth, onShowMembership }) => {
   const [keywords, setKeywords] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<PoemCategory>('poetry');
   const [selectedStyle, setSelectedStyle] = useState<PoemStyle>({
@@ -205,6 +209,18 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
   const generatePoem = async () => {
     if (!keywords.trim()) return;
 
+    // Check permissions before generating
+    const permissions = authService.getUserPermissions();
+    if (!permissions.canGenerate || permissions.remainingGenerations <= 0) {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        onShowAuth();
+      } else {
+        onShowMembership();
+      }
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
 
@@ -217,6 +233,9 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
         theme: keywords,
         explanation: `${poemData.explanation}\n\n格律分析：${poemData.styleAnalysis}`
       });
+      
+      // Increment generation count
+      authService.incrementGenerationCount();
     } catch (err) {
       console.error('Poetry generation error:', err);
       setError(isEnglish ? 'Failed to generate poetry. Please try again.' : '詩詞生成失敗，請重試。');
@@ -225,23 +244,7 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
     }
   };
 
-  const copyToClipboard = () => {
-    if (generatedPoem) {
-      navigator.clipboard.writeText(generatedPoem.content);
-    }
-  };
-
-  const downloadPoem = () => {
-    if (generatedPoem) {
-      const element = document.createElement('a');
-      const file = new Blob([generatedPoem.content], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = 'classical_poem.txt';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }
-  };
+  const permissions = authService.getUserPermissions();
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -326,23 +329,40 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
           </div>
 
           {/* Generate Button */}
-          <button
-            onClick={generatePoem}
-            disabled={!keywords.trim() || isGenerating}
-            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+          <ProtectedContent
+            type="generate"
+            isEnglish={isEnglish}
+            onShowAuth={onShowAuth}
+            onShowMembership={onShowMembership}
           >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin" />
-                <span>{isEnglish ? 'Generating...' : '創作中...'}</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                <span>{isEnglish ? 'Generate Poetry' : '生成詩詞'}</span>
-              </>
-            )}
-          </button>
+            <button
+              onClick={generatePoem}
+              disabled={!keywords.trim() || isGenerating || !permissions.canGenerate || permissions.remainingGenerations <= 0}
+              className="w-full bg-indigo-600 text-white py-4 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <span>{isEnglish ? 'Generating...' : '創作中...'}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  <span>{isEnglish ? 'Generate Poetry' : '生成詩詞'}</span>
+                </>
+              )}
+            </button>
+          </ProtectedContent>
+          
+          {/* Generation Limit Info */}
+          {permissions.dailyLimit !== 999 && (
+            <div className="mt-2 text-center text-sm text-gray-600">
+              {isEnglish 
+                ? `${permissions.remainingGenerations}/${permissions.dailyLimit} generations remaining today`
+                : `今日剩余生成次数：${permissions.remainingGenerations}/${permissions.dailyLimit}`
+              }
+            </div>
+          )}
         </div>
       </div>
 
@@ -356,11 +376,19 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
             </h3>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-8 border border-amber-100 mb-6">
-            <div className="text-2xl font-serif text-gray-800 leading-loose text-center whitespace-pre-line">
-              {generatedPoem.content}
+          <ProtectedContent
+            content={generatedPoem.content}
+            isEnglish={isEnglish}
+            onShowAuth={onShowAuth}
+            onShowMembership={onShowMembership}
+            type="copy"
+          >
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-8 border border-amber-100 mb-6">
+              <div className="text-2xl font-serif text-gray-800 leading-loose text-center whitespace-pre-line">
+                {generatedPoem.content}
+              </div>
             </div>
-          </div>
+          </ProtectedContent>
 
           {/* Poem Details */}
           <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -388,24 +416,32 @@ const Creator: React.FC<CreatorProps> = ({ isEnglish }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={copyToClipboard}
-              className="flex-1 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <ProtectedContent
+              content={generatedPoem.content}
+              isEnglish={isEnglish}
+              onShowAuth={onShowAuth}
+              onShowMembership={onShowMembership}
+              type="copy"
             >
-              <Copy className="w-5 h-5" />
-              <span>{isEnglish ? 'Copy' : '複製'}</span>
-            </button>
-            <button
-              onClick={downloadPoem}
-              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+              <div></div>
+            </ProtectedContent>
+            
+            <ProtectedContent
+              content={generatedPoem.content}
+              isEnglish={isEnglish}
+              onShowAuth={onShowAuth}
+              onShowMembership={onShowMembership}
+              type="export"
             >
-              <Download className="w-5 h-5" />
-              <span>{isEnglish ? 'Download' : '下載'}</span>
-            </button>
+              <div></div>
+            </ProtectedContent>
+          </div>
+          
+          <div className="flex justify-center">
             <button
               onClick={() => setGeneratedPoem(null)}
-              className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
             >
               {isEnglish ? 'Create Another' : '再創作一首'}
             </button>

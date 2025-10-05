@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { BookOpen, MessageCircle, X, Lightbulb, ExternalLink, FileText, Send, Loader } from 'lucide-react';
 import { deepseekService } from '../services/deepseekApi';
+import ProtectedContent from './ProtectedContent';
 
 interface ReaderProps {
   isEnglish: boolean;
   text: string;
+  onShowAuth: () => void;
+  onShowMembership: () => void;
 }
 
 interface Annotation {
@@ -14,7 +17,7 @@ interface Annotation {
   reference?: string;
 }
 
-const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
+const Reader: React.FC<ReaderProps> = ({ isEnglish, text, onShowAuth, onShowMembership }) => {
   const [selectedText, setSelectedText] = useState('');
   const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [showAnnotation, setShowAnnotation] = useState(false);
@@ -290,11 +293,19 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
                   {isEnglish ? 'Main Text' : '正文'}
                 </h4>
               </div>
-              <div className="text-2xl font-serif text-blue-800 leading-loose">
-                <div className="text-left">
-                  {renderFormattedText(currentDisplayText)}
+              <ProtectedContent
+                content={currentDisplayText}
+                isEnglish={isEnglish}
+                onShowAuth={onShowAuth}
+                onShowMembership={onShowMembership}
+                type="copy"
+              >
+                <div className="text-2xl font-serif text-blue-800 leading-loose">
+                  <div className="text-left">
+                    {renderFormattedText(currentDisplayText)}
+                  </div>
                 </div>
-              </div>
+              </ProtectedContent>
             </div>
 
             {/* Copyright/Publication Info */}
@@ -329,11 +340,19 @@ const Reader: React.FC<ReaderProps> = ({ isEnglish, text }) => {
           </div>
         ) : (
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-100">
-            <div className="text-2xl font-serif text-gray-800 leading-loose">
-              <div className="text-center">
-                {currentDisplayText === sampleText ? renderInteractiveText(sampleText) : renderInteractiveText(currentDisplayText)}
+            <ProtectedContent
+              content={currentDisplayText}
+              isEnglish={isEnglish}
+              onShowAuth={onShowAuth}
+              onShowMembership={onShowMembership}
+              type="copy"
+            >
+              <div className="text-2xl font-serif text-gray-800 leading-loose">
+                <div className="text-center">
+                  {currentDisplayText === sampleText ? renderInteractiveText(sampleText) : renderInteractiveText(currentDisplayText)}
+                </div>
               </div>
-            </div>
+            </ProtectedContent>
           </div>
         )}
 

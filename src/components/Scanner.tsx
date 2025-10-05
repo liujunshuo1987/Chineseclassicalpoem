@@ -6,9 +6,11 @@ import { ocrService } from '../services/ocrApi';
 interface ScannerProps {
   isEnglish: boolean;
   onNavigateToReader: (text: string) => void;
+  onShowAuth: () => void;
+  onShowMembership: () => void;
 }
 
-const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader }) => {
+const Scanner: React.FC<ScannerProps> = ({ isEnglish, onNavigateToReader, onShowAuth, onShowMembership }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<{
