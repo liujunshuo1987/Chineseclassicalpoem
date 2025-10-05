@@ -164,6 +164,18 @@ class DatabaseService {
       isAdmin: false
     };
 
+    // Check if user is admin - admins get unlimited access
+    if (profile.role === 'admin') {
+      return {
+        canCopy: true,
+        canExport: true,
+        canGenerate: true,
+        dailyLimit: 999999,
+        remainingGenerations: 999999,
+        isAdmin: true
+      };
+    }
+
     // Check trial expiration
     if (profile.membership_type === 'trial' && profile.trial_start) {
       const trialDays = Math.floor((now.getTime() - new Date(profile.trial_start).getTime()) / (1000 * 60 * 60 * 24));

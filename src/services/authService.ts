@@ -34,11 +34,15 @@ class AuthService {
     try {
       const profile = await databaseService.getUserProfile(userId);
       if (profile) {
+        // Get the actual email from Supabase auth
+        const { data: { user } } = await supabase.auth.getUser();
+        const email = user?.email || 'user@example.com';
+
         this.userProfile = profile;
         this.currentUser = {
           id: profile.auth_user_id,
           username: profile.username,
-          email: userId,
+          email: email,
           membershipType: profile.membership_type as any,
           role: profile.role || 'user',
           trialStartDate: profile.trial_start ? new Date(profile.trial_start) : undefined,
