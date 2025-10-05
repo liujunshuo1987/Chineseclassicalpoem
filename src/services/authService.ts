@@ -36,15 +36,15 @@ class AuthService {
       if (profile) {
         this.userProfile = profile;
         this.currentUser = {
-          id: profile.id,
+          id: profile.auth_user_id,
           username: profile.username,
-          email: profile.email,
+          email: userId,
           membershipType: profile.membership_type as any,
           role: profile.role || 'user',
-          trialStartDate: profile.trial_start_date ? new Date(profile.trial_start_date) : undefined,
+          trialStartDate: profile.trial_start ? new Date(profile.trial_start) : undefined,
           expiryDate: profile.expiry_date ? new Date(profile.expiry_date) : undefined,
-          generationsUsed: profile.generations_used,
-          dailyGenerationsUsed: profile.daily_generations_used,
+          generationsUsed: profile.generations_used || 0,
+          dailyGenerationsUsed: profile.daily_generations_used || 0,
           lastGenerationDate: profile.last_generation_date ? new Date(profile.last_generation_date) : undefined,
           createdAt: new Date(profile.created_at)
         };

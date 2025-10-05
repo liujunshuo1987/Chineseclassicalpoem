@@ -11,17 +11,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database types
 export interface UserProfile {
-  id: string;
+  id: number;
+  auth_user_id: string;
   username: string;
-  email: string;
   membership_type: 'visitor' | 'trial' | 'monthly' | 'annual' | 'expired';
-  trial_start_date?: string;
+  role?: 'user' | 'admin';
+  trial_start?: string;
   expiry_date?: string;
-  generations_used: number;
-  daily_generations_used: number;
+  generations_used?: number;
+  daily_generations_used?: number;
   last_generation_date?: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Order {

@@ -5,11 +5,10 @@ class DatabaseService {
   // User Profile Management
   async createUserProfile(userId: string, username: string, email: string): Promise<UserProfile> {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .insert({
-        id: userId,
+        auth_user_id: userId,
         username,
-        email,
         membership_type: 'visitor'
       })
       .select()
@@ -21,20 +20,20 @@ class DatabaseService {
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .select('*')
-      .eq('id', userId)
-      .single();
+      .eq('auth_user_id', userId)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error) throw error;
     return data;
   }
 
   async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile> {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .update(updates)
-      .eq('id', userId)
+      .eq('auth_user_id', userId)
       .select()
       .single();
 
@@ -45,12 +44,12 @@ class DatabaseService {
   // Membership Management
   async startTrial(userId: string): Promise<boolean> {
     const { error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .update({
         membership_type: 'trial',
-        trial_start_date: new Date().toISOString()
+        trial_start: new Date().toISOString()
       })
-      .eq('id', userId);
+      .eq('auth_user_id', userId);
 
     return !error;
   }
@@ -58,7 +57,7 @@ class DatabaseService {
   async upgradeMembership(userId: string, planType: 'monthly' | 'annual'): Promise<boolean> {
     const now = new Date();
     const expiryDate = new Date(now);
-    
+
     if (planType === 'monthly') {
       expiryDate.setMonth(expiryDate.getMonth() + 1);
     } else {
@@ -66,12 +65,12 @@ class DatabaseService {
     }
 
     const { error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .update({
         membership_type: planType,
         expiry_date: expiryDate.toISOString()
       })
-      .eq('id', userId);
+      .eq('auth_user_id', userId);
 
     return !error;
   }
@@ -161,12 +160,13 @@ class DatabaseService {
       canExport: false,
       canGenerate: false,
       dailyLimit: 0,
-      remainingGenerations: 0
+      remainingGenerations: 0,
+      isAdmin: false
     };
 
     // Check trial expiration
-    if (profile.membership_type === 'trial' && profile.trial_start_date) {
-      const trialDays = Math.floor((now.getTime() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24));
+    if (profile.membership_type === 'trial' && profile.trial_start) {
+      const trialDays = Math.floor((now.getTime() - new Date(profile.trial_start).getTime()) / (1000 * 60 * 60 * 24));
       const remainingDays = Math.max(0, 7 - trialDays);
       
       if (remainingDays > 0) {
@@ -176,7 +176,8 @@ class DatabaseService {
           canGenerate: true,
           dailyLimit: 999,
           remainingGenerations: 999,
-          trialDaysRemaining: remainingDays
+          trialDaysRemaining: remainingDays,
+          isAdmin: false
         };
       } else {
         // Trial expired
@@ -202,37 +203,41 @@ class DatabaseService {
           canExport: false,
           canGenerate: true,
           dailyLimit: 1,
-          remainingGenerations: Math.max(0, 1 - dailyUsed)
+          remainingGenerations: Math.max(0, 1 - dailyUsed),
+          isAdmin: false
         };
         break;
-      
+
       case 'monthly':
         permissions = {
           canCopy: true,
           canExport: true,
           canGenerate: true,
           dailyLimit: 30,
-          remainingGenerations: Math.max(0, 30 - dailyUsed)
+          remainingGenerations: Math.max(0, 30 - dailyUsed),
+          isAdmin: false
         };
         break;
-      
+
       case 'annual':
         permissions = {
           canCopy: true,
           canExport: true,
           canGenerate: true,
           dailyLimit: 999,
-          remainingGenerations: 999
+          remainingGenerations: 999,
+          isAdmin: false
         };
         break;
-      
+
       case 'expired':
         permissions = {
           canCopy: false,
           canExport: false,
           canGenerate: false,
           dailyLimit: 0,
-          remainingGenerations: 0
+          remainingGenerations: 0,
+          isAdmin: false
         };
         break;
     }
