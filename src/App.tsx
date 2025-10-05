@@ -87,18 +87,18 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-3 py-3 md:px-4 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="w-7 h-7 md:w-8 md:h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {isEnglish ? 'Classical Chinese Literature' : '古典文學'}
+              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                {isEnglish ? 'Classical Chinese Literature' : '文'}
               </h1>
             </div>
-            
-            <div className="flex items-center space-x-3">
+
+            <div className="flex items-center space-x-1 md:space-x-3">
               {/* User Status */}
               <div className="hidden md:block">
                 <UserStatus
@@ -107,44 +107,45 @@ function App() {
                   onNavigateToAccount={() => setCurrentPage('account')}
                 />
               </div>
-              
+
               {/* Mobile User Button */}
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="md:hidden flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="md:hidden flex items-center justify-center p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
                 title={isEnglish ? 'User Account' : '用户账户'}
               >
-                <User className="w-4 h-4 text-gray-600" />
+                <User className="w-5 h-5 text-gray-600" />
               </button>
-              
+
               <button
                 onClick={toggleLanguage}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 transition-colors"
+                className="flex items-center justify-center p-2 md:px-3 md:py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 transition-colors"
+                title={isEnglish ? 'Switch Language' : '切换语言'}
               >
-                <Languages className="w-4 h-4 text-indigo-600" />
-                <span className="text-sm font-medium text-indigo-700">
+                <Languages className="w-5 h-5 md:w-4 md:h-4 text-indigo-600" />
+                <span className="hidden md:inline-block md:ml-2 text-sm font-medium text-indigo-700">
                   {isEnglish ? '中文' : 'EN'}
                 </span>
               </button>
-              
+
               <button
                 onClick={() => setCurrentPage('settings')}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="flex items-center justify-center p-2 md:px-3 md:py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
                 title={isEnglish ? 'API Settings' : 'API 設置'}
               >
-                <Key className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
+                <Key className="w-5 h-5 md:w-4 md:h-4 text-gray-600" />
+                <span className="hidden md:inline-block md:ml-2 text-sm font-medium text-gray-700">
                   {isEnglish ? 'API Settings' : 'API 設置'}
                 </span>
               </button>
-              
+
               <button
                 onClick={() => setCurrentPage('about')}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="flex items-center justify-center p-2 md:px-3 md:py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
                 title={isEnglish ? 'Contact Us' : '聯繫我們'}
               >
-                <MessageCircle className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
+                <MessageCircle className="w-5 h-5 md:w-4 md:h-4 text-gray-600" />
+                <span className="hidden md:inline-block md:ml-2 text-sm font-medium text-gray-700">
                   {isEnglish ? 'Contact Us' : '聯繫我們'}
                 </span>
               </button>

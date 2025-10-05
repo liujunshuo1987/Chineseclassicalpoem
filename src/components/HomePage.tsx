@@ -66,14 +66,14 @@ const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, 
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-6 md:py-8">
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+      <div className="text-center mb-8 md:mb-12">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-6">
           {isEnglish ? 'Discover Classical Chinese Literature' : '探索古典中文文學'}
         </h2>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          {isEnglish 
+        <p className="text-sm md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          {isEnglish
             ? 'Experience the beauty of ancient texts through modern technology. Digitize, understand, and create classical Chinese literature with AI assistance.'
             : '通過現代科技體驗古代文本之美。借助AI輔助數位化、理解和創作古典中文文學。'
           }
@@ -105,22 +105,22 @@ const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, 
       </div>
 
       {/* Stats Section */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg">
-        <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">
+      <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg">
+        <h3 className="text-base md:text-xl lg:text-2xl font-bold text-center text-gray-900 mb-6 md:mb-8">
           {isEnglish ? 'Trusted by Scholars Worldwide' : '全球學者信賴'}
         </h3>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-3 gap-4 md:gap-8">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <div key={index} className="text-center">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-6 h-6 text-indigo-600" />
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                  <Icon className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">
+                <div className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 md:mb-2">
                   {isEnglish ? stat.valueEn : stat.valueZh}
                 </div>
-                <div className="text-gray-600">
+                <div className="text-xs md:text-sm lg:text-base text-gray-600">
                   {isEnglish ? stat.labelEn : stat.labelZh}
                 </div>
               </div>
