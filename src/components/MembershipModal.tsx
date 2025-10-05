@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Crown, Check, Zap, Gift, CreditCard } from 'lucide-react';
 import { authService } from '../services/authService';
 import { MembershipPlan } from '../types/user';
