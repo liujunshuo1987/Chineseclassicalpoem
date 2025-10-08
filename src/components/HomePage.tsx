@@ -111,9 +111,6 @@ const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, 
 
       {/* Stats Section */}
       <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-8 shadow-lg">
-        <h3 className="hidden md:block text-xl lg:text-2xl font-semibold text-center text-gray-900 mb-8">
-          {isEnglish ? 'Trusted by Scholars Worldwide' : '全球學者信賴'}
-        </h3>
         <div className="grid grid-cols-3 gap-3 md:gap-8">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
