@@ -109,27 +109,6 @@ const HomePage: React.FC<HomePageProps> = ({ isEnglish, onNavigate, onShowAuth, 
         })}
       </div>
 
-      {/* Stats Section */}
-      <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-8 shadow-lg">
-        <div className="grid grid-cols-3 gap-3 md:gap-8">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div key={index} className="text-center">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4">
-                  <Icon className="w-4 h-4 md:w-6 md:h-6 text-indigo-600" />
-                </div>
-                <div className="text-lg md:text-2xl lg:text-3xl font-semibold text-gray-900 mb-1 md:mb-2">
-                  {isEnglish ? stat.valueEn : stat.valueZh}
-                </div>
-                <div className="text-xs md:text-sm lg:text-base text-gray-600">
-                  {isEnglish ? stat.labelEn : stat.labelZh}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Sample Text Preview */}
       <div className="mt-8 md:mt-16 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl md:rounded-2xl p-4 md:p-8">
