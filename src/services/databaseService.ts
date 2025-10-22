@@ -19,14 +19,12 @@ class DatabaseService {
   }
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
-    console.log('getUserProfile called with userId:', userId);
     const { data, error } = await supabase
       .from('users')
       .select('*')
       .eq('auth_user_id', userId)
       .maybeSingle();
 
-    console.log('getUserProfile result - data:', data, 'error:', error);
     if (error) throw error;
     return data;
   }

@@ -34,9 +34,7 @@ class AuthService {
 
   private async loadUserProfile(userId: string) {
     try {
-      console.log('Loading user profile for userId:', userId);
       const profile = await databaseService.getUserProfile(userId);
-      console.log('Profile loaded:', profile);
 
       if (profile) {
         // Get the actual email from Supabase auth
@@ -57,10 +55,7 @@ class AuthService {
           lastGenerationDate: profile.last_generation_date ? new Date(profile.last_generation_date) : undefined,
           createdAt: new Date(profile.created_at)
         };
-        console.log('Current user set to:', this.currentUser);
         this.notifyListeners();
-      } else {
-        console.log('No profile found for userId:', userId);
       }
     } catch (error) {
       console.error('Failed to load user profile:', error);
@@ -68,8 +63,6 @@ class AuthService {
   }
 
   private notifyListeners() {
-    console.log('Notifying listeners, currentUser:', this.currentUser);
-    console.log('Number of listeners:', this.listeners.length);
     this.listeners.forEach(listener => listener(this.currentUser));
   }
 
@@ -85,13 +78,10 @@ class AuthService {
   }
 
   async login(email: string, password: string): Promise<User> {
-    console.log('Login attempt for:', email);
     const { user } = await databaseService.signIn(email, password);
-    console.log('Sign in result user:', user);
     if (!user) throw new Error('Login failed');
 
     await this.loadUserProfile(user.id);
-    console.log('After loadUserProfile, currentUser:', this.currentUser);
     return this.currentUser!;
   }
 
