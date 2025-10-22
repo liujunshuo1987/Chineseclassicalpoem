@@ -12,15 +12,17 @@ class AuthService {
   }
 
   private async initializeAuth() {
-    // Listen for auth state changes
-    databaseService.onAuthStateChange(async (user) => {
-      if (user) {
-        await this.loadUserProfile(user.id);
-      } else {
-        this.currentUser = null;
-        this.userProfile = null;
-        this.notifyListeners();
-      }
+    // Listen for auth state changes - avoid async callback to prevent deadlock
+    databaseService.onAuthStateChange((user) => {
+      (async () => {
+        if (user) {
+          await this.loadUserProfile(user.id);
+        } else {
+          this.currentUser = null;
+          this.userProfile = null;
+          this.notifyListeners();
+        }
+      })();
     });
 
     // Check current session

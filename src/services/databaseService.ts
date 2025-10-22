@@ -309,9 +309,13 @@ class DatabaseService {
   }
 
   onAuthStateChange(callback: (user: any) => void) {
-    return supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       callback(session?.user || null);
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }
 }
 
