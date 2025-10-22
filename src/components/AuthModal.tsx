@@ -31,8 +31,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, isEnglish, initi
         await authService.register(email, password, username);
       }
       onClose();
-    } catch (err) {
-      setError(isEnglish ? 'Authentication failed. Please try again.' : '认证失败，请重试。');
+    } catch (err: any) {
+      console.error('Auth error:', err);
+      const errorMessage = err?.message || (isEnglish ? 'Authentication failed. Please try again.' : '认证失败，请重试。');
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
